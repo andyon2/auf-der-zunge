@@ -1,17 +1,24 @@
 // Parametric SVG figure, ported from arbeit/06-mockups (figur()).
-// Frame 240 x 232, line drawing. Only Frau Brandt exists on day 1, so only her look is kept.
+// Frame 240 x 232, line drawing. Looks of Frau Brandt (day 1) and Jule (day 2) as in the mockup.
 import type { FaceParams } from '../engine/faces';
 
-const LOOK = {
-  skin: 'var(--skin-a)',
-  hair: 'var(--hair-a)',
-  cloth: 'var(--cloth-a)',
-  hairBack: 'M60 92 C58 52 80 34 100 34 C122 34 142 52 140 92 L141 116 Q120 122 116 112 L84 112 Q80 122 59 116 Z',
-  hairFront: 'M66 84 C64 52 84 38 102 38 C122 38 136 52 134 80 C124 66 108 58 92 62 C82 66 72 74 66 84 Z',
+export type Who = 'brandt' | 'jule';
+
+const LOOKS = {
+  brandt: {
+    skin: 'var(--skin-a)', hair: 'var(--hair-a)', cloth: 'var(--cloth-a)', glasses: true, wear: 'blazer', phone: false,
+    hairBack: 'M60 92 C58 52 80 34 100 34 C122 34 142 52 140 92 L141 116 Q120 122 116 112 L84 112 Q80 122 59 116 Z',
+    hairFront: 'M66 84 C64 52 84 38 102 38 C122 38 136 52 134 80 C124 66 108 58 92 62 C82 66 72 74 66 84 Z',
+  },
+  jule: {
+    skin: 'var(--skin-b)', hair: 'var(--hair-b)', cloth: 'var(--cloth-b)', glasses: false, wear: 'hoodie', phone: true,
+    hairBack: 'M60 100 C54 56 76 32 100 32 C124 32 146 56 140 100 C140 128 146 146 152 160 L48 160 C54 146 60 128 60 100 Z',
+    hairFront: 'M66 84 C66 56 82 40 100 40 C114 40 126 48 132 62 C118 62 104 56 97 48 C90 62 78 72 66 82 Z',
+  },
 };
 
-export function figure(p: FaceParams): string {
-  const k = LOOK;
+export function figure(p: FaceParams, who: Who = 'brandt'): string {
+  const k = LOOKS[who];
   const y0 = 168 - p.shoulders * 12; // shoulder line
   const X = (x: number) => x + 20, Y = (y: number) => y + 6; // head from 200 grid into 240 frame
 
@@ -20,8 +27,9 @@ export function figure(p: FaceParams): string {
   s += `<path d="${k.hairBack}" style="fill:${k.hair}" transform="translate(20 6) rotate(${p.tilt} 100 130)"/>`;
   s += `<path class="f-fill" style="fill:${k.cloth}" d="M2 234 C6 ${y0 + 18} 50 ${y0} 98 ${y0 - 4} L142 ${y0 - 4} C190 ${y0} 234 ${y0 + 18} 238 234 Z"/>`;
   s += `<path class="f-fill" style="fill:${k.skin}" d="M${X(89)} ${Y(116)} L${X(89)} ${y0 - 2} Q120 ${y0 + 6} ${X(111)} ${y0 - 2} L${X(111)} ${Y(116)}"/>`;
-  // blazer
-  s += `<path class="f-ln" d="M102 ${y0 - 3} L120 ${y0 + 30} L138 ${y0 - 3}"/><path class="f-fine" d="M94 ${y0} L112 ${y0 + 44} L104 ${y0 + 52} M146 ${y0} L128 ${y0 + 44} L136 ${y0 + 52}"/>`;
+  s += k.wear === 'blazer'
+    ? `<path class="f-ln" d="M102 ${y0 - 3} L120 ${y0 + 30} L138 ${y0 - 3}"/><path class="f-fine" d="M94 ${y0} L112 ${y0 + 44} L104 ${y0 + 52} M146 ${y0} L128 ${y0 + 44} L136 ${y0 + 52}"/>`
+    : `<path class="f-ln" d="M88 ${y0 - 2} Q120 ${y0 + 20} 152 ${y0 - 2}"/><path class="f-fine" d="M112 ${y0 + 10} L111 ${y0 + 36} M128 ${y0 + 10} L129 ${y0 + 36}"/>`;
   if (p.arms === 'down') {
     s += `<path class="f-fine" d="M40 ${y0 + 22} Q34 ${y0 + 44} 36 234 M200 ${y0 + 22} Q206 ${y0 + 44} 204 234"/>`;
   } else {
@@ -29,7 +37,14 @@ export function figure(p: FaceParams): string {
     const a = y0 - 22;
     s += `<path class="f-fill" style="fill:${k.cloth}" d="M26 ${a + 34} Q120 ${a + 14} 214 ${a + 30} L216 ${a + 58} Q120 ${a + 42} 24 ${a + 62} Z"/>`;
     s += `<path class="f-fine" d="M44 ${a + 44} Q120 ${a + 28} 198 ${a + 40}"/>`;
+    // with crossed arms Jule keeps the phone in her right hand, it sticks out above the hand
+    if (k.phone) s += `<rect class="f-fill" x="200" y="${a + 10}" width="16" height="26" rx="3" transform="rotate(12 208 ${a + 23})" style="fill:var(--paper-3)"/>`;
     s += `<path class="f-fill" style="fill:${k.skin}" d="M196 ${a + 30} q12 -4 16 5 q-2 9 -14 9 Z"/><path class="f-fill" style="fill:${k.skin}" d="M44 ${a + 40} q-12 -2 -14 8 q4 8 14 6 Z"/>`;
+  }
+  // Jule holds her phone in both hands in front of her (STIL.md `phone`, as in bildfolge).
+  if (k.phone && p.arms === 'down') {
+    s += `<g transform="rotate(-8 120 ${y0 + 22})"><rect class="f-fill" x="102" y="${y0 + 10}" width="36" height="26" rx="4" style="fill:var(--paper-3)"/>`
+      + `<path class="f-fill" style="fill:${k.skin}" d="M98 ${y0 + 38} q-3 -16 9 -18 l2 18 Z M142 ${y0 + 38} q3 -16 -9 -18 l-2 18 Z"/></g>`;
   }
 
   // head
@@ -49,7 +64,7 @@ export function figure(p: FaceParams): string {
     + `<path class="f-fill" style="fill:${k.skin}" d="M67 80 C59 77 58 96 68 98 M133 80 C141 77 142 96 132 98"/>`
     + `<path class="f-fill" style="fill:${k.skin}" d="M66 82 C66 52 82 40 100 40 C118 40 134 52 134 82 C134 106 122 126 100 128 C78 126 66 106 66 82 Z"/>`
     + `<path d="${k.hairFront}" style="fill:${k.hair}"/>`
-    + brows + eye(86) + eye(114) + glasses
+    + brows + eye(86) + eye(114) + (k.glasses ? glasses : '')
     + `<path class="f-fine" d="M100 90 Q97.5 99 96 102 Q99 104.5 103 103"/>`
     + mouth + jaw + `</g>`;
   return s;
