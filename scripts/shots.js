@@ -1,28 +1,45 @@
-// Plays every path of day 1 in German and English with a fixed seed in 390x844, 360x640 and 375x667
-// and takes one screenshot per screen. The language comes from the browser locale (de-DE / en-US).
+// Plays every path of day 1 and the test paths of day 2 (skript-tag2.md) in German and English with a fixed seed
+// in 390x844, 360x640 and 375x667 and takes one screenshot per screen. Day 1 runs go on to the start of day 2
+// (Kessler sentence after the ends E and G); day 2 runs start with ?tag=2 and end with "Noch mal" back at day 1.
+// Day 2 per step: echo shown or not, the echo sentence only at the first echo, face preset, cost line of the end. The language comes from the browser locale (de-DE / en-US).
 // Checks: blocklist, digits (only the clock time), max 3 lines per sentence, font >= 17 px,
 // touch targets >= 44 px, cards / button / cost line inside the viewport, nothing sticking out sideways,
 // no stretch longer than 1 s without a card or button (timers run on Playwright's fake clock), console errors.
 // Extra runs: ?reset=1 with locale en-US and de-DE shows the start screen in that language;
 // offline: after one visit the page reloads without network and the game plays (service worker).
-// Run: npm run shots (builds first). Output: shots/<lang>/<path>/NN-<step>.png, shots/reset/, shots/offline/
+// Run: npm run shots [-- <dir>] (builds first). Output: <dir>/<lang>/<path>/NN-<step>.png, <dir>/reset/, <dir>/offline/
+// (<dir> defaults to shots)
 import { chromium } from 'playwright';
 import { preview } from 'vite';
 import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 
 const SEED = 20261007;
 const json = file => JSON.parse(readFileSync(new URL(`../content/${file}`, import.meta.url)));
+const OUT = process.argv[2] || 'shots';
+const text = (lang, day) => ({ ...json(`${lang}/tag1.json`), ...(day === 2 ? json(`${lang}/tag2.json`) : {}) });
 const LANGS = {
-  de: { locale: 'de-DE', block: json('blocklist.json'), clock: '16:50', title: json('de/tag1.json')['ui.title'] },
-  en: { locale: 'en-US', block: json('blocklist-en.json'), clock: '4:50', title: json('en/tag1.json')['ui.title'] },
+  de: { locale: 'de-DE', block: json('blocklist.json'), clock: '16:50', t1: text('de', 1), t2: text('de', 2) },
+  en: { locale: 'en-US', block: json('blocklist-en.json'), clock: '4:50', t1: text('en', 1), t2: text('en', 2) },
 };
 const PATHS = { 'A-E-G': ['A', 'E', 'G'], 'B-D': ['B', 'D'], 'C-E': ['C', 'E'], 'A-F-G': ['A', 'F', 'G'], 'A-F-H': ['A', 'F', 'H'], 'B-F-I': ['B', 'F', 'I'] };
+// Day 2 test paths, copied from skript-tag2.md ("Testpfade fuer Playwright").
+const PATHS2 = {
+  'A-R1-I': { picks: ['A', 'R1', 'I'], echo: ['echo.A', null, null], faces: ['closed', 'tense', 'opening'], end: 'I' },
+  'A-E-H':  { picks: ['A', 'E', 'H'],  echo: ['echo.A', 'echo.A', 'echo.A'], faces: ['closed', 'hard', 'tenseAway'], end: 'H' },
+  'B-F-R2': { picks: ['B', 'F', 'R2'], echo: [null, 'echo.F', null], faces: ['tense', 'closed', 'tense'], end: 'R2' },
+  'C-E-G':  { picks: ['C', 'E', 'G'],  echo: [null, null, null], faces: ['opening', 'yielding', 'closed'], end: 'G' },
+  'B-D':    { picks: ['B', 'D'],       echo: [null, null], faces: ['tense', 'tenseAway'], end: 'D' },
+};
 const BIG = { width: 390, height: 844 }, SMALL = { width: 360, height: 640 }, MID = { width: 375, height: 667 };
 const RUNS = Object.keys(LANGS).flatMap(lang => [
   ...Object.entries(PATHS).map(([name, picks]) => ({ lang, name, picks, viewport: BIG })),
   { lang, name: 'dunkel-C-E', picks: PATHS['C-E'], viewport: BIG, dark: true },
   ...Object.entries(PATHS).map(([name, picks]) => ({ lang, name: `360-${name}`, picks, viewport: SMALL })),
   ...Object.entries(PATHS).map(([name, picks]) => ({ lang, name: `375-${name}`, picks, viewport: MID })),
+  ...Object.entries(PATHS2).map(([name, p]) => ({ lang, day: 2, name: `tag2-${name}`, ...p, viewport: BIG })),
+  { lang, day: 2, name: 'tag2-dunkel-A-E-H', ...PATHS2['A-E-H'], viewport: BIG, dark: true },
+  ...Object.entries(PATHS2).map(([name, p]) => ({ lang, day: 2, name: `tag2-360-${name}`, ...p, viewport: SMALL })),
+  ...Object.entries(PATHS2).map(([name, p]) => ({ lang, day: 2, name: `tag2-375-${name}`, ...p, viewport: MID })),
 ]);
 const MAX_IDLE = 1000; // ms without a visible card or button
 
@@ -30,13 +47,14 @@ function check(page, lang) {
   return page.evaluate(({ BLOCK, CLOCK, LANG }) => {
     const out = [];
     const W = innerWidth, H = innerHeight;
-    document.querySelectorAll('.caption, .her, .you, .say, .over, .log p, .rv p, .title, .tagline, .help').forEach(el => {
+    document.querySelectorAll('.caption, .her, .you, .say, .over, .log p, .rv p, .title, .tagline, .help, .day, .echo').forEach(el => {
       const cs = getComputedStyle(el);
       const h = el.getBoundingClientRect().height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
         - parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
       const lines = Math.round(h / parseFloat(cs.lineHeight));
       const label = el.textContent.trim().slice(0, 40);
-      if (lines > 3) out.push(`${lines} Zeilen: ${label}`);
+      // the lage of day 2 (131 characters, verbatim from the script) needs 4 lines at 17 px; accepted, see bericht M3
+      if (lines > (el.id === 'lage' && el.textContent.length > 120 ? 4 : 3)) out.push(`${lines} Zeilen: ${label}`);
       if (el.scrollWidth > el.clientWidth + 1) out.push(`abgeschnitten: ${label}`);
       if (parseFloat(cs.fontSize) < 17 && !el.classList.contains('help')) out.push(`Schrift ${cs.fontSize}: ${label}`);
     });
@@ -67,7 +85,7 @@ function check(page, lang) {
 const server = await preview({ preview: { port: 4179, strictPort: true }, logLevel: 'silent' });
 const url = `http://localhost:4179/?seed=${SEED}`;
 const browser = await chromium.launch();
-rmSync('shots', { recursive: true, force: true });
+rmSync(OUT, { recursive: true, force: true });
 
 let findings = 0, errors = 0, shots = 0;
 const warn = msg => { findings++; console.log(`WARN ${msg}`); };
@@ -82,8 +100,39 @@ async function phone(name, { viewport = BIG, locale = 'de-DE', dark = false } = 
   return { context, page };
 }
 
+// Day 2: what the stage must show at this step of the test path.
+async function checkDay2(page, run, step) {
+  const out = [];
+  const L = LANGS[run.lang];
+  const st = await page.evaluate(() => ({
+    face: document.getElementById('app').dataset.face, echo: document.getElementById('app').dataset.echo,
+    echoShown: !!document.querySelector('.echo:not([hidden])'),
+    echoText: document.querySelector('.echo:not([hidden])')?.textContent ?? '',
+    hint: [...document.querySelectorAll('.caption')].map(c => c.textContent),
+    cost: [...document.querySelectorAll('.rv p')].map(p => p.textContent),
+  }));
+  const m = step.match(/^(you|face|hand)-(\d)$/);
+  const n = m ? Number(m[2]) : 0;
+  // the echo after answer k is visible from face-k on, until face-(k+1); at the end and in the review it stays
+  const k = !m ? (step === 'her' ? 0 : run.picks.length) : m[1] === 'face' ? n : n - 1;
+  const want = k ? run.echo[k - 1] : null;
+  if ((st.echo || null) !== want) out.push(`Echo ${st.echo || '-'} statt ${want || '-'}`);
+  if (st.echoShown !== !!want) out.push(`Echo ${st.echoShown ? 'sichtbar' : 'nicht sichtbar'}`);
+  if (want && st.echoText !== L.t2[want]) out.push(`Echo-Text "${st.echoText}"`);
+  // the echo sentence: only at the first echo, until the next answer
+  const first = run.echo.findIndex(e => e) + 1;
+  const hintWanted = first > 0 && (step === `face-${first}` || step === `hand-${first + 1}`);
+  if (st.hint.includes(L.t2['ui.echoHint']) !== hintWanted) out.push(`Echo-Erklaersatz ${hintWanted ? 'fehlt' : 'steht da'}`);
+  // the chat sentence: at the first picture, until the first answer
+  const chatWanted = step === 'her' || step === 'hand-1';
+  if (st.hint.includes(L.t2['ui.chatHint']) !== chatWanted) out.push(`Chat-Satz ${chatWanted ? 'fehlt' : 'steht da'}`);
+  if (m && m[1] === 'face' && st.face !== run.faces[n - 1]) out.push(`Gesicht ${st.face} statt ${run.faces[n - 1]}`);
+  if (step === 'review-3' && !st.cost.includes(L.t2[`cost.${run.end}`])) out.push(`Kostenzeile ${run.end} fehlt`);
+  return out;
+}
+
 for (const run of RUNS) {
-  const dir = `shots/${run.lang}/${run.name}`;
+  const dir = `${OUT}/${run.lang}/${run.name}`;
   mkdirSync(dir, { recursive: true });
   const { context, page } = await phone(`${run.lang}/${run.name}`, { viewport: run.viewport, locale: LANGS[run.lang].locale, dark: run.dark });
   await page.clock.install();
@@ -99,17 +148,29 @@ for (const run of RUNS) {
       await page.clock.runFor(100);
     }
   };
-  let n = 0;
+  let n = 0, again = false; // again: after "Noch mal" day 1 runs, the day 2 checks stop
   const snap = async step => {
     await reach(step);
     const file = `${dir}/${String(++n).padStart(2, '0')}-${step}.png`;
     await page.screenshot({ path: file, animations: 'disabled' });
     shots++;
     for (const f of await check(page, run.lang)) warn(`${file}: ${f}`);
+    if (run.day === 2 && !again && /^(her|hand|you|face|over|review)/.test(step)) for (const f of await checkDay2(page, run, step)) warn(`${file}: ${f}`);
+  };
+  const L = LANGS[run.lang];
+  const day2Line = async want => {
+    const line = await page.textContent('h1.day');
+    if (line !== L.t2[want]) warn(`${dir}: Tag-2-Satz "${line}" statt ${want}`);
   };
 
-  await page.goto(url);
-  await snap('start');
+  if (run.day === 2) {
+    await page.goto(`${url}&tag=2`);
+    await snap('day2');
+    await day2Line('ui.day2'); // nothing stored from day 1: the plain sentence
+  } else {
+    await page.goto(url);
+    await snap('start');
+  }
   await page.click('#go');
   await snap('her');
   for (let i = 0; i < run.picks.length; i++) {
@@ -125,14 +186,24 @@ for (const run of RUNS) {
     await snap(step);
   }
   await page.click('#go');
-  await snap('done');
-  await page.click('#go');
-  await snap('her'); // "Noch mal" starts the conversation again, with a new seed
+  if (run.day === 2) {
+    await snap('done');
+    await page.click('#go');
+    again = true;
+    await snap('her'); // "Noch mal" starts day 1 again, with a new seed
+    const label = await page.getAttribute('.stage svg', 'aria-label');
+    if (label !== L.t1['ui.stage']) warn(`${dir}: Noch mal zeigt "${label}" statt Tag 1`);
+  } else {
+    // after the review of day 1: start of day 2; ends E and G name Kessler
+    await snap('day2');
+    const end = run.picks.at(-1);
+    await day2Line(end === 'E' || end === 'G' ? 'ui.day2.kessler' : 'ui.day2');
+  }
   await context.close();
 }
 
 // ?reset=1: the stored language is forgotten, the browser language decides, the parameter is gone.
-mkdirSync('shots/reset', { recursive: true });
+mkdirSync(`${OUT}/reset`, { recursive: true });
 for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
   const { context, page } = await phone(`reset-${lang}`, { locale: LANGS[lang].locale });
   await page.goto(url);
@@ -142,12 +213,13 @@ for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
   await page.goto(`${url}&reset=1`);
   await page.waitForURL(u => !u.search.includes('reset'));
   await page.waitForSelector('#app[data-step="start"]');
-  const file = `shots/reset/${LANGS[lang].locale}-start.png`;
+  const file = `${OUT}/reset/${LANGS[lang].locale}-start.png`;
   await page.screenshot({ path: file });
   shots++;
+  const want = LANGS[lang].t1['ui.title'];
   const title = await page.textContent('.title');
-  if (title !== LANGS[lang].title) warn(`${file}: Titel "${title}" statt "${LANGS[lang].title}"`);
-  if (await page.title() !== LANGS[lang].title) warn(`${file}: Seitentitel "${await page.title()}"`);
+  if (title !== want) warn(`${file}: Titel "${title}" statt "${want}"`);
+  if (await page.title() !== want) warn(`${file}: Seitentitel "${await page.title()}"`);
   const active = await page.getAttribute('[aria-pressed="true"]', 'data-lang');
   if (active !== lang) warn(`${file}: Umschalter zeigt ${active} als aktiv`);
   for (const f of await check(page, lang)) warn(`${file}: ${f}`);
@@ -155,7 +227,7 @@ for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
 }
 
 // Offline: one visit online, then no network, reload, play C-E to the end (real timers).
-mkdirSync('shots/offline', { recursive: true });
+mkdirSync(`${OUT}/offline`, { recursive: true });
 {
   const { context, page } = await phone('offline');
   await page.goto(url);
@@ -164,16 +236,16 @@ mkdirSync('shots/offline', { recursive: true });
   await context.setOffline(true);
   await page.reload();
   await page.waitForSelector('#app[data-step="start"]');
-  await page.screenshot({ path: 'shots/offline/01-start.png' });
+  await page.screenshot({ path: `${OUT}/offline/01-start.png` });
   await page.click('#go');
   for (const id of PATHS['C-E']) await page.click(`.say[data-id="${id}"]`);
   await page.waitForSelector('#app[data-step="over"]');
   for (let i = 0; i < 3; i++) await page.click('#go');
   await page.waitForSelector('#app[data-step="review-3"]');
   await page.waitForTimeout(600); // let the last line finish fading in
-  await page.screenshot({ path: 'shots/offline/02-review-3.png', animations: 'disabled' });
+  await page.screenshot({ path: `${OUT}/offline/02-review-3.png`, animations: 'disabled' });
   shots += 2;
-  for (const f of await check(page, 'de')) warn(`shots/offline/02-review-3.png: ${f}`);
+  for (const f of await check(page, 'de')) warn(`${OUT}/offline/02-review-3.png: ${f}`);
   const online = await page.evaluate(() => navigator.onLine);
   if (online) warn('offline: Seite meldet navigator.onLine = true');
   console.log(`offline: Neu laden ohne Netz und Pfad C-E bis zum Rueckblick gespielt (navigator.onLine = ${online})`);
@@ -182,5 +254,5 @@ mkdirSync('shots/offline', { recursive: true });
 
 await browser.close();
 await new Promise(resolve => server.httpServer.close(resolve));
-console.log(`${shots} Screenshots in shots/, ${findings} Befunde, ${errors} Konsolenfehler`);
+console.log(`${shots} Screenshots in ${OUT}/, ${findings} Befunde, ${errors} Konsolenfehler`);
 process.exitCode = findings || errors ? 1 : 0;
