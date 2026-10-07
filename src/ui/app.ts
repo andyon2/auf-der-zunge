@@ -299,7 +299,7 @@ function showDone(): void {
 
 // ---------- Help page (Spielkonzept 8) ----------
 
-type HelpEntry = { name_de: string; name_en: string; number: string; url: string; hours: string; checked: string };
+type HelpEntry = { name_de: string; name_en: string; number: string; url: string; hours: string; hours_en: string; checked: string };
 const HELP = helpJson as Record<Land, HelpEntry[]>;
 
 const helpHint = () => `<p class="help"><button class="help-link" data-help>${t('ui.help')}</button></p>`;
@@ -309,10 +309,9 @@ function helpHtml(shown: Land): string {
   const items = entries.map(e => {
     const tel = phoneLinks(e.number).map(n => `<a class="tel" href="tel:${n.tel}">${esc(n.text)}</a>`).join('');
     const host = new URL(e.url).hostname.replace(/^www\./, '');
-    // hours exist only in German (help.json); the English page marks them as German
     return `<li><h2 class="hname">${esc(lang === 'de' ? e.name_de : e.name_en)}</h2>`
       + (tel ? `<p class="nums">${tel}</p>` : '')
-      + `<p class="hours"${lang === 'de' ? '' : ' lang="de"'}>${esc(e.hours)}</p>`
+      + `<p class="hours">${esc(lang === 'de' ? e.hours : e.hours_en)}</p>`
       + `<p><a class="web" href="${esc(e.url)}" target="_blank" rel="noopener">${esc(host)}</a></p></li>`;
   }).join('');
   // the oldest date of the shown entries

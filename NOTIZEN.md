@@ -220,14 +220,23 @@ Neue Texte (`content/<sprache>/tag1.json`, gelten fuer beide Tage):
 | ui.helpChecked | Quellen geprüft am | Sources checked on | DE Vorgabe Auftrag, Datum dahinter |
 | ui.back | Zurück | Back | DE Vorgabe Auftrag |
 
+### Nachbesserung 4b
+
+- Neues Feld `hours_en` je Eintrag in `content/help.json`: woertliche Uebersetzung von `hours`, keine neuen Angaben
+  (Vorgabe Koordinator). Uhrzeiten als "Mon-Fri 10:00-17:00" statt "10-17 Uhr", "kostenlos" als "free of charge".
+  Die EN-Seite zeigt `hours_en`, ohne `lang="de"`.
+- Echte Umlaute in `hours`: "möglich", "175+ Länder", "EU-Ländern" (vorher ae/oe), auch in der Kopie im Projekt-Repo
+  `arbeit/08-bau/m4/help.json`. `name_de` hatte keine Ersatzschreibung. Nummern, URLs, `source`, `name` unveraendert.
+- Zeitzone ohne Region: kanadische Zonen (Toronto, Vancouver, Edmonton, Winnipeg, Halifax, St_Johns, Regina, Montreal,
+  Moncton, Whitehorse, Yellowknife, Iqaluit) und America/Mexico_City ergeben intl, uebrige America/* weiter USA.
+
 Regeln auf der Hilfeseite (shots.js, eng begrenzt auf Schritt `help`): Ziffern nur in Nummern, Links, Zeiten und Datumszeile;
 Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft die Sperrliste DE auch fuer alle `hours`.
 
 ## Offen
 
-- `hours` in `help.json` gibt es nur auf Deutsch; die englische Hilfeseite zeigt sie deutsch (mit `lang="de"`). Braucht ein Feld
-  `hours_en` aus den Quellen; nicht selbst uebersetzt.
-- `hours` schreibt zwei Umlaute als ae/oe ("175+ Laender", "ebenfalls moeglich", "EU-Laendern"); laut Auftrag nicht geaendert.
+- `hours_en` ist uebersetzt, nicht aus englischen Quellen uebernommen; nicht von einer Muttersprachlerin gegengelesen.
+- Andere America/*-Zonen ausserhalb der USA (z. B. America/Bogota, America/Sao_Paulo) ergeben weiter USA (Vorgabe M4, nur Kanada und Mexiko-Stadt ausgenommen).
 - Die Nummern sind nicht angerufen, die Links nicht im Lauf geoeffnet (nur Ziel und neuer Tab geprueft).
 - Hilfeseite nur in Chromium geprueft; `tel:` auf einem echten Telefon ungeprueft. Rueckblick: Hilfe-Link bei 390x844 erst nach Scrollen sichtbar.
 - Gesichtswechsel nur im Bild geprueft, nicht auf einem echten Geraet.

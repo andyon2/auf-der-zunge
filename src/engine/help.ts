@@ -7,6 +7,10 @@ const BY_ZONE: Record<string, Land> = {
   'Europe/Berlin': 'de', 'Europe/Vienna': 'at', 'Europe/Zurich': 'ch', 'Europe/London': 'gb', 'Europe/Dublin': 'ie',
 };
 
+// America/* means the US, except Canada and Mexico City (they get the international list).
+const NOT_US = ['Toronto', 'Vancouver', 'Edmonton', 'Winnipeg', 'Halifax', 'St_Johns', 'Regina', 'Montreal', 'Moncton',
+  'Whitehorse', 'Yellowknife', 'Iqaluit', 'Mexico_City'];
+
 // Region of the first browser language (de-AT -> at); without a region the time zone; otherwise intl.
 // ?land=xx (param) overrides, for tests.
 export function detectLand(languages: readonly string[], timeZone: string | undefined, param: string | null): Land {
@@ -15,7 +19,7 @@ export function detectLand(languages: readonly string[], timeZone: string | unde
   try { region = languages[0] ? new Intl.Locale(languages[0]).region : undefined; } catch { /* not a language tag */ }
   if (region) return BY_REGION[region.toUpperCase()] ?? 'intl';
   if (timeZone && BY_ZONE[timeZone]) return BY_ZONE[timeZone];
-  if (timeZone?.startsWith('America/')) return 'us';
+  if (timeZone?.startsWith('America/') && !NOT_US.includes(timeZone.slice(8))) return 'us';
   return 'intl';
 }
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import help from '../../content/help.json';
 import blockDe from '../../content/blocklist.json';
+import blockEn from '../../content/blocklist-en.json';
 import { detectLand, LANDS, phoneLinks } from './help';
 
 describe('detectLand', () => {
@@ -18,11 +19,16 @@ describe('detectLand', () => {
 
   it.each([
     ['Europe/Berlin', 'de'], ['Europe/Vienna', 'at'], ['Europe/Zurich', 'ch'], ['Europe/London', 'gb'],
-    ['Europe/Dublin', 'ie'], ['America/New_York', 'us'], ['America/Los_Angeles', 'us'], ['America/Toronto', 'us'],
+    ['Europe/Dublin', 'ie'], ['America/New_York', 'us'], ['America/Los_Angeles', 'us'], ['America/Chicago', 'us'], ['America/Anchorage', 'us'],
     ['Europe/Paris', 'intl'], ['Asia/Tokyo', 'intl'], ['UTC', 'intl'], [undefined, 'intl'],
   ])('without region, time zone %s -> %s', (zone, land) => {
     expect(detectLand(['de'], zone, null)).toBe(land);
     expect(detectLand([], zone, null)).toBe(land);
+  });
+
+  it.each(['Toronto', 'Vancouver', 'Edmonton', 'Winnipeg', 'Halifax', 'St_Johns', 'Regina', 'Montreal', 'Moncton',
+    'Whitehorse', 'Yellowknife', 'Iqaluit', 'Mexico_City'])('without region, America/%s (Canada, Mexico) -> intl', city => {
+    expect(detectLand(['en'], `America/${city}`, null)).toBe('intl');
   });
 
   it('falls back to the time zone for a broken tag', () => {
@@ -48,18 +54,22 @@ describe('phoneLinks', () => {
 });
 
 describe('content/help.json', () => {
-  const data = help as Record<string, { name_de: string; name_en: string; number: string; url: string; hours: string; checked: string }[]>;
+  const data = help as Record<string, { name_de: string; name_en: string; number: string; url: string; hours: string; hours_en: string; checked: string }[]>;
   it('has every country, each with entries', () => {
     expect(Object.keys(data).sort()).toEqual([...LANDS].sort());
     for (const land of LANDS) expect(data[land].length).toBeGreaterThan(0);
   });
-  it.each(LANDS)('%s: every entry has names, a number or https link, a date, and hours without blocked words', land => {
+  it.each(LANDS)('%s: every entry has names, a number or https link, a date, and hours in DE and EN without blocked words', land => {
     for (const e of data[land]) {
       expect(e.name_de && e.name_en).toBeTruthy();
       expect(phoneLinks(e.number).length > 0 || e.number === '').toBe(true);
       expect(e.url).toMatch(/^https:\/\//);
       expect(e.checked).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       for (const w of blockDe) expect(e.hours.toLowerCase()).not.toContain(w.toLowerCase());
+      expect(e.hours_en).toBeTruthy();
+      for (const w of blockEn) expect(e.hours_en.toLowerCase()).not.toContain(w.toLowerCase());
+      // real umlauts in what the page shows
+      for (const s of [e.hours, e.name_de]) expect(s).not.toMatch(/Laender|moeglich|Maenner|haeuslich|fuer/);
     }
   });
 });

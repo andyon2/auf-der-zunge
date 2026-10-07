@@ -7,6 +7,7 @@
    "number": "110",
    "url": "https://www.bundesnetzagentur.de/DE/Fachthemen/Telekommunikation/Nummerierung/Notruf/start.html",
    "hours": "bundesweit einheitliche Rufnummer der Polizei",
+   "hours_en": "uniform nationwide police number",
    "langs": [
     "de"
    ],
@@ -20,6 +21,7 @@
    "number": "116 016",
    "url": "https://www.hilfetelefon.de",
    "hours": "rund um die Uhr, an 365 Tagen im Jahr",
+   "hours_en": "around the clock, 365 days a year",
    "langs": [
     "de",
     "18 weitere Sprachen",
@@ -35,6 +37,7 @@
    "number": "0800 1239900",
    "url": "https://www.maennerhilfetelefon.de",
    "hours": "Mo-Do 8-20 Uhr, Fr 8-15 Uhr, kostenlos",
+   "hours_en": "Mon-Thu 8:00-20:00, Fri 8:00-15:00, free of charge",
    "langs": [
     "de",
     "en",
@@ -50,6 +53,7 @@
    "number": "0800 1110111 / 0800 1110222 / 116 123",
    "url": "https://www.telefonseelsorge.de",
    "hours": "rund um die Uhr, kostenlos",
+   "hours_en": "around the clock, free of charge",
    "langs": [
     "de"
    ],
@@ -64,7 +68,8 @@
    "name_en": "Police emergency",
    "number": "133",
    "url": "https://www.bmi.gv.at/notrufnummern/start.html",
-   "hours": "Euro-Notruf 112 ebenfalls moeglich",
+   "hours": "Euro-Notruf 112 ebenfalls möglich",
+   "hours_en": "European emergency number 112 also possible",
    "langs": [
     "de"
    ],
@@ -78,6 +83,7 @@
    "number": "0800/222 555",
    "url": "https://www.frauenhelpline.at",
    "hours": "rund um die Uhr, kostenlos, anonym, vertraulich",
+   "hours_en": "around the clock, free of charge, anonymous, confidential",
    "langs": [
     "de",
     "en",
@@ -99,6 +105,7 @@
    "number": "0800 400 777",
    "url": "https://www.maennerinfo.at",
    "hours": "24/7, kostenlos, vertraulich",
+   "hours_en": "24/7, free of charge, confidential",
    "langs": [
     "de",
     "weitere Sprachen telefonisch"
@@ -113,6 +120,7 @@
    "number": "142",
    "url": "https://www.telefonseelsorge.at",
    "hours": "rund um die Uhr, kostenlos, vertraulich",
+   "hours_en": "around the clock, free of charge, confidential",
    "langs": [
     "de"
    ],
@@ -128,6 +136,7 @@
    "number": "117",
    "url": "https://www.kkpks.ch/de",
    "hours": "Notruf; auch 112",
+   "hours_en": "emergency number; also 112",
    "langs": [
     "de",
     "fr",
@@ -143,6 +152,7 @@
    "number": "142",
    "url": "https://www.opferhilfe-schweiz.ch",
    "hours": "nationale Nummer der Opferhilfe; keine Notrufnummer",
+   "hours_en": "national victim support number; not an emergency number",
    "langs": [
     "de",
     "fr",
@@ -160,6 +170,7 @@
    "number": "143",
    "url": "https://www.143.ch",
    "hours": "rund um die Uhr, kostenlos",
+   "hours_en": "around the clock, free of charge",
    "langs": [
     "de",
     "fr",
@@ -178,6 +189,7 @@
    "number": "999",
    "url": "https://www.gov.uk/report-crime",
    "hours": "bei unmittelbarer Gefahr oder laufender Straftat",
+   "hours_en": "in immediate danger or during a crime in progress",
    "langs": [
     "en"
    ],
@@ -191,6 +203,7 @@
    "number": "0808 2000 247",
    "url": "https://www.nationaldahelpline.org.uk",
    "hours": "24 Stunden, 365 Tage, kostenlos",
+   "hours_en": "24 hours, 365 days, free of charge",
    "langs": [
     "en",
     "many other languages",
@@ -206,6 +219,7 @@
    "number": "0808 8010327",
    "url": "https://mensadviceline.org.uk",
    "hours": "Mo-Fr 10-17 Uhr, kostenlos",
+   "hours_en": "Mon-Fri 10:00-17:00, free of charge",
    "langs": [
     "en"
    ],
@@ -219,6 +233,7 @@
    "number": "116 123",
    "url": "https://www.samaritans.org/how-we-can-help/contact-samaritan/",
    "hours": "24 Stunden, 365 Tage, kostenlos",
+   "hours_en": "24 hours, 365 days, free of charge",
    "langs": [
     "en"
    ],
@@ -234,6 +249,7 @@
    "number": "911",
    "url": "https://www.justice.gov/ovw/domestic-violence",
    "hours": "bei unmittelbarer Gefahr",
+   "hours_en": "in immediate danger",
    "langs": [
     "en"
    ],
@@ -247,6 +263,7 @@
    "number": "1-800-799-SAFE (7233)",
    "url": "https://www.thehotline.org",
    "hours": "24/7, kostenlos; Chat; TTY 800-787-3224",
+   "hours_en": "24/7, free of charge; chat; TTY 800-787-3224",
    "langs": [
     "en",
     "es"
@@ -261,6 +278,7 @@
    "number": "988",
    "url": "https://988lifeline.org",
    "hours": "24/7/365, kostenlos, Anruf, SMS oder Chat",
+   "hours_en": "24/7/365, free of charge, call, text or chat",
    "langs": [
     "en",
     "es"
@@ -277,6 +295,7 @@
    "number": "999 / 112",
    "url": "https://www.garda.ie",
    "hours": "im Notfall immer 999/112",
+   "hours_en": "in an emergency always 999/112",
    "langs": [
     "en"
    ],
@@ -290,6 +309,7 @@
    "number": "1800 341 900",
    "url": "https://www.womensaid.ie",
    "hours": "24 Stunden, 7 Tage, kostenlos",
+   "hours_en": "24 hours, 7 days, free of charge",
    "langs": [
     "en"
    ],
@@ -303,6 +323,7 @@
    "number": "01 554 3811",
    "url": "https://www.mensaid.ie",
    "hours": "Mo-Fr 9-17 Uhr",
+   "hours_en": "Mon-Fri 9:00-17:00",
    "langs": [
     "en"
    ],
@@ -316,6 +337,7 @@
    "number": "116 123",
    "url": "https://www.samaritans.org/ireland/samaritans-ireland/",
    "hours": "rund um die Uhr, kostenlos",
+   "hours_en": "around the clock, free of charge",
    "langs": [
     "en"
    ],
@@ -330,7 +352,8 @@
    "name_en": "Find a Helpline (worldwide)",
    "number": "",
    "url": "https://findahelpline.com",
-   "hours": "Verzeichnis, 175+ Laender, Telefon/Text/Chat",
+   "hours": "Verzeichnis, 175+ Länder, Telefon/Text/Chat",
+   "hours_en": "directory, 175+ countries, phone/text/chat",
    "langs": [
     "en",
     "viele"
@@ -344,7 +367,8 @@
    "name_en": "EU emergency number",
    "number": "112",
    "url": "https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/index_en.htm",
-   "hours": "kostenlos in allen EU-Laendern",
+   "hours": "kostenlos in allen EU-Ländern",
+   "hours_en": "free of charge in all EU countries",
    "langs": [
     "viele"
    ],

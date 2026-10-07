@@ -40,10 +40,10 @@ Sprache: beim ersten Start aus der Browsersprache (de* → Deutsch, sonst Englis
 Der Hinweis „Bei Angst oder Gewalt: Hilfe in deinem Land“ (Start, Start Tag 2, Rückblick, Ende) öffnet eine Hilfeseite im Spiel.
 Das Land kommt aus der Region der ersten Browsersprache (de-AT → Österreich), ohne Region aus der Zeitzone, sonst „Weitere Länder“
 (`src/engine/help.ts`). Die Einträge stehen in `content/help.json`, je Land eine Liste mit `name`, `name_de`, `name_en`,
-`number`, `url`, `hours`, `langs`, `source`, `checked`.
+`number`, `url`, `hours`, `hours_en` (Übersetzung von `hours`), `langs`, `source`, `checked`.
 
 **Einmal pro Saison prüfen** (Nummern und Zeiten ändern sich): jeden Eintrag gegen seine `source` (offizielle Seite) prüfen,
-Nummer, Zeiten und Link anpassen, `checked` auf das Prüfdatum (JJJJ-MM-TT) setzen. Die Seite zeigt das älteste `checked` des
+Nummer, Zeiten (`hours` und `hours_en`) und Link anpassen, `checked` auf das Prüfdatum (JJJJ-MM-TT) setzen. Die Seite zeigt das älteste `checked` des
 angezeigten Landes als „Quellen geprüft am …“. Mehrere Nummern in `number` mit „ / “ trennen, jede wird ein eigener Anruf-Link.
 Danach `npm test` (Pflichtfelder, Datum, Sperrliste in `hours`) und `npm run shots`. Herkunft der Quellen: `arbeit/08-bau/m4/hilfe-quellen.md`
 im Projekt-Repo.

@@ -151,8 +151,9 @@ async function checkHelp(page, lang, shown, detected) {
     if (it.name !== name) out.push(`Name "${it.name}" statt "${name}"`);
     if (it.tels.join() !== tels.join()) out.push(`${name}: tel ${it.tels.join()} statt ${tels.join()}`);
     if (it.href !== e.url || it.target !== '_blank' || !it.rel.includes('noopener')) out.push(`${name}: Link ${it.href} ${it.target} ${it.rel}`);
-    if (it.hours !== e.hours) out.push(`${name}: Zeiten "${it.hours}"`);
-    if (it.hoursLang !== (lang === 'de' ? '' : 'de')) out.push(`${name}: Zeiten lang="${it.hoursLang}"`);
+    const hours = lang === 'de' ? e.hours : e.hours_en;
+    if (it.hours !== hours) out.push(`${name}: Zeiten "${it.hours}" statt "${hours}"`);
+    if (it.hoursLang !== '') out.push(`${name}: Zeiten lang="${it.hoursLang}"`);
   });
   return out;
 }
@@ -320,7 +321,7 @@ for (const land of LANDS) for (const lang of Object.keys(LANGS)) for (const [vp,
 
 // Country from the browser: region of the first language, else the time zone (no ?land=).
 for (const [locale, timezoneId, want] of [['de-AT', 'Europe/Berlin', 'at'], ['en-GB', 'Europe/Berlin', 'gb'], ['fr-CH', 'Europe/Berlin', 'ch'],
-  ['en-IE', 'Europe/Berlin', 'ie'], ['de-DE', 'America/Chicago', 'de'], ['de', 'Europe/Zurich', 'ch'], ['en', 'America/Chicago', 'us'],
+  ['en-IE', 'Europe/Berlin', 'ie'], ['de-DE', 'America/Chicago', 'de'], ['de', 'Europe/Zurich', 'ch'], ['en', 'America/Chicago', 'us'], ['en', 'America/Toronto', 'intl'], ['es', 'America/Mexico_City', 'intl'],
   ['fr-FR', 'Europe/Berlin', 'intl'], ['de', 'Asia/Tokyo', 'intl']]) {
   const context = await browser.newContext({ locale, timezoneId });
   const page = await context.newPage();
@@ -330,7 +331,7 @@ for (const [locale, timezoneId, want] of [['de-AT', 'Europe/Berlin', 'at'], ['en
   if (got !== want) warn(`Land bei ${locale} / ${timezoneId}: ${got} statt ${want}`);
   await context.close();
 }
-console.log('Land aus Browsersprache und Zeitzone: 9 Faelle geprueft');
+console.log('Land aus Browsersprache und Zeitzone: 11 Faelle geprueft');
 
 // ?reset=1: the stored language is forgotten, the browser language decides, the parameter is gone.
 mkdirSync(`${OUT}/reset`, { recursive: true });
