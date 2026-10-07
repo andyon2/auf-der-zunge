@@ -193,7 +193,7 @@ Grundlage: Spielkonzept 8, `arbeit/08-bau/m4/help.json` und `hilfe-quellen.md` (
 - `content/help.json`: Entwurf uebernommen, Felder unveraendert, keine Nummer geaendert. Gestrichen: intl-Eintrag
   "116 Nummern (116 123 u.a.)" (schwache Quelle, Empfehlung hilfe-quellen.md). Sonst wortgleich.
 - Land (`src/engine/help.ts`): Region der ersten Browsersprache (DE, AT, CH, GB, US, IE), ohne Region die Zeitzone
-  (Berlin, Wien, Zuerich, London, Dublin, America/* → USA), sonst intl. Eine Region ausserhalb der Liste (fr-FR) ergibt intl,
+  (Berlin, Wien, Zuerich, London, Dublin, Zonen der USA → USA, siehe 4b), sonst intl. Eine Region ausserhalb der Liste (fr-FR) ergibt intl,
   nicht die Zeitzone. `?land=xx` ueberschreibt (nur bekannte Laender).
 - Ansicht: der vorhandene Hinweis `ui.help` ist ein Link-Knopf (17 px, unterstrichen, 44 px hoch, vorher 14 px Text) am Start,
   am Start Tag 2, am Ende und neu unter dem Weiter-Knopf im Rueckblick. Er oeffnet die Hilfeseite im Spiel: das Spiel wird
@@ -227,8 +227,7 @@ Neue Texte (`content/<sprache>/tag1.json`, gelten fuer beide Tage):
   Die EN-Seite zeigt `hours_en`, ohne `lang="de"`.
 - Echte Umlaute in `hours`: "möglich", "175+ Länder", "EU-Ländern" (vorher ae/oe), auch in der Kopie im Projekt-Repo
   `arbeit/08-bau/m4/help.json`. `name_de` hatte keine Ersatzschreibung. Nummern, URLs, `source`, `name` unveraendert.
-- Zeitzone ohne Region: kanadische Zonen (Toronto, Vancouver, Edmonton, Winnipeg, Halifax, St_Johns, Regina, Montreal,
-  Moncton, Whitehorse, Yellowknife, Iqaluit) und America/Mexico_City ergeben intl, uebrige America/* weiter USA.
+- Zeitzone ohne Region (Regel umgedreht, Vorgabe Koordinator): nur Zonen der USA ergeben us (New_York, Chicago, Denver, Phoenix, Los_Angeles, Anchorage, Adak, Pacific/Honolulu, Detroit, Indiana/*, Kentucky/*, Boise, Juneau, Sitka, Nome, Metlakatla, Menominee, North_Dakota/*), jede andere America/*-Zone intl.
 
 Regeln auf der Hilfeseite (shots.js, eng begrenzt auf Schritt `help`): Ziffern nur in Nummern, Links, Zeiten und Datumszeile;
 Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft die Sperrliste DE auch fuer alle `hours`.
@@ -236,7 +235,6 @@ Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft
 ## Offen
 
 - `hours_en` ist uebersetzt, nicht aus englischen Quellen uebernommen; nicht von einer Muttersprachlerin gegengelesen.
-- Andere America/*-Zonen ausserhalb der USA (z. B. America/Bogota, America/Sao_Paulo) ergeben weiter USA (Vorgabe M4, nur Kanada und Mexiko-Stadt ausgenommen).
 - Die Nummern sind nicht angerufen, die Links nicht im Lauf geoeffnet (nur Ziel und neuer Tab geprueft).
 - Hilfeseite nur in Chromium geprueft; `tel:` auf einem echten Telefon ungeprueft. Rueckblick: Hilfe-Link bei 390x844 erst nach Scrollen sichtbar.
 - Gesichtswechsel nur im Bild geprueft, nicht auf einem echten Geraet.

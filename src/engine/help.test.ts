@@ -20,6 +20,11 @@ describe('detectLand', () => {
   it.each([
     ['Europe/Berlin', 'de'], ['Europe/Vienna', 'at'], ['Europe/Zurich', 'ch'], ['Europe/London', 'gb'],
     ['Europe/Dublin', 'ie'], ['America/New_York', 'us'], ['America/Los_Angeles', 'us'], ['America/Chicago', 'us'], ['America/Anchorage', 'us'],
+    ['America/Denver', 'us'], ['America/Phoenix', 'us'], ['America/Adak', 'us'], ['Pacific/Honolulu', 'us'],
+    ['America/Detroit', 'us'], ['America/Indiana/Indianapolis', 'us'], ['America/Kentucky/Louisville', 'us'],
+    ['America/Boise', 'us'], ['America/Juneau', 'us'], ['America/Sitka', 'us'], ['America/Nome', 'us'],
+    ['America/Metlakatla', 'us'], ['America/Menominee', 'us'], ['America/North_Dakota/Center', 'us'],
+    ['America/Bogota', 'intl'], ['America/Sao_Paulo', 'intl'], ['America/Argentina/Buenos_Aires', 'intl'],
     ['Europe/Paris', 'intl'], ['Asia/Tokyo', 'intl'], ['UTC', 'intl'], [undefined, 'intl'],
   ])('without region, time zone %s -> %s', (zone, land) => {
     expect(detectLand(['de'], zone, null)).toBe(land);
@@ -27,7 +32,7 @@ describe('detectLand', () => {
   });
 
   it.each(['Toronto', 'Vancouver', 'Edmonton', 'Winnipeg', 'Halifax', 'St_Johns', 'Regina', 'Montreal', 'Moncton',
-    'Whitehorse', 'Yellowknife', 'Iqaluit', 'Mexico_City'])('without region, America/%s (Canada, Mexico) -> intl', city => {
+    'Whitehorse', 'Yellowknife', 'Iqaluit', 'Mexico_City'])('without region, America/%s (not US) -> intl', city => {
     expect(detectLand(['en'], `America/${city}`, null)).toBe('intl');
   });
 
