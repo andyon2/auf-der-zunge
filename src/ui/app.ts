@@ -1,5 +1,5 @@
 // Screens of day 1, in the order of the picture sequence (arbeit/06-mockups/bildfolge):
-// start -> lage -> her line -> hand -> your line -> her face changes -> her answer -> ... -> over -> review -> done.
+// start -> lage with her line -> hand -> your line -> her face changes -> her answer with the next hand -> ... -> over -> review -> done.
 // #app[data-step] names the current screen; scripts/shots.js waits for it.
 import sceneJson from '../../content/tag1.json';
 import de from '../../content/de/tag1.json';
@@ -10,8 +10,8 @@ import { figure } from './figure';
 const scene = sceneJson as Scene;
 const text = de as Record<string, string>;
 
-// Pauses between the beats of one exchange (ms).
-const BEAT = { lage: 1600, her: 1800, you: 900, face: 1100, reply: 1400 };
+// Pauses between the beats of one exchange (ms). No screen without a card or button lasts longer than 1 s.
+const BEAT = { hand: 600, you: 400, face: 600 };
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -46,7 +46,7 @@ function showStart(): void {
 
 function stage(face: FaceName): string {
   const W = 390, H = 300, sc = 1.42, tx = W / 2 - 120 * sc, ty = -14, wx = W - 108;
-  return `<div class="stage"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice" role="img" aria-label="${t('ui.stage')}">
+  return `<div class="stage"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax meet" role="img" aria-label="${t('ui.stage')}">
     <rect width="${W}" height="${H}" fill="var(--room)"/>
     <rect x="${wx}" y="40" width="86" height="130" fill="var(--window)" stroke="var(--rule)" stroke-width="4"/>
     <path d="M${wx + 43} 40 V170" stroke="var(--rule)" stroke-width="4"/>
@@ -68,7 +68,7 @@ function changeFace(face: FaceName): void {
   old.classList.remove('fig', 'fig-in');
   old.classList.add('fig-out');
   old.after(next);
-  setTimeout(() => old.remove(), 500);
+  setTimeout(() => old.remove(), 350);
 }
 
 const herLine = (id: string) => `<p class="her appear"><q>${t(id)}</q></p>`;
@@ -76,38 +76,38 @@ const youLine = (id: string) => `<p class="you appear">${t('ui.you')} <q>${t(id)
 
 async function conversation(): Promise<void> {
   let state = newGame(scene, seed);
-  app.innerHTML = `${stage(state.face)}<p class="caption">${t(scene.lage)}</p><div id="lines"></div><div id="below"></div>`;
+  // Lage and her first line appear together, the cards follow shortly after.
+  app.innerHTML = `${stage(state.face)}<p class="caption" id="lage">${t(scene.lage)}</p>`
+    + `<div id="lines">${herLine(state.line)}</div><div id="below" hidden></div>`;
   const lines = app.querySelector<HTMLElement>('#lines')!;
   const below = app.querySelector<HTMLElement>('#below')!;
   below.className = 'hand';
-  below.hidden = true;
-
-  setStep('lage');
-  await wait(BEAT.lage);
-  lines.innerHTML = herLine(state.line);
+  window.scrollTo(0, 0);
   setStep('her');
-  await wait(BEAT.her);
+  await wait(BEAT.hand);
 
   for (let n = 1; !state.end; n++) {
     const option = await pick(below, hand(state), n);
     const before = state.line;
     state = choose(scene, state, option);
 
+    app.querySelector('#lage')?.remove(); // from the first answer on, the stage and the lines need the room
     lines.innerHTML = `<p class="her"><q>${t(before)}</q></p>` + youLine(option);
     setStep(`you-${n}`);
     await wait(BEAT.you);
     changeFace(state.face);
     setStep(`face-${n}`);
     await wait(BEAT.face);
+    // her answer and the next cards come together
     lines.innerHTML = `<p class="you">${t('ui.you')} <q>${t(option)}</q></p>` + herLine(state.line);
-    setStep(`reply-${n}`);
-    await wait(BEAT.reply);
   }
 
+  if (state.note) lines.insertAdjacentHTML('beforeend', `<p class="note appear">${t(state.note)}</p>`);
   lines.insertAdjacentHTML('beforeend', `<p class="over appear">${t('ui.over')}</p>`);
   below.className = 'bottom';
   below.innerHTML = `<button class="go" id="go">${t('ui.next')}</button>`;
   below.hidden = false;
+  below.scrollIntoView({ block: 'end' });
   setStep('over');
   const final = state;
   below.querySelector('#go')!.addEventListener('click', () => showReview(final));
@@ -119,6 +119,7 @@ function pick(box: HTMLElement, options: string[], n: number): Promise<string> {
     + options.map(id => `<button class="say" data-id="${id}">${t(id)}</button>`).join('');
   box.hidden = false;
   box.classList.add('appear');
+  box.scrollIntoView({ block: 'end' });
   setStep(`hand-${n}`);
   return new Promise(resolve => {
     box.querySelectorAll<HTMLButtonElement>('.say').forEach(b => b.addEventListener('click', () => {
@@ -146,11 +147,13 @@ function showReview(state: GameState): void {
     <div id="more"></div>
     <div class="bottom"><button class="go" id="go">${t('ui.next')}</button></div>`;
   const more = app.querySelector<HTMLElement>('#more')!;
+  window.scrollTo(0, 0);
   let shown = 0;
   setStep('review-1');
   app.querySelector('#go')!.addEventListener('click', () => {
     if (shown === steps.length) return showDone();
     more.insertAdjacentHTML('beforeend', steps[shown++]);
+    app.querySelector('#go')!.scrollIntoView({ block: 'end' });
     setStep(`review-${shown + 1}`);
   });
 }
@@ -158,7 +161,8 @@ function showReview(state: GameState): void {
 function showDone(): void {
   app.innerHTML = `
     <div class="start"><h1 class="title">${t('ui.title')}</h1><p class="tagline">${t('ui.done')}</p></div>
-    <div class="bottom"><button class="go" id="go">${t('ui.again')}</button></div>`;
+    <div class="bottom"><button class="go" id="go">${t('ui.again')}</button></div>
+    <p class="help">${t('ui.help')}</p>`;
   setStep('done');
   app.querySelector('#go')!.addEventListener('click', () => conversation());
   window.scrollTo(0, 0);

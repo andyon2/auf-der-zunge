@@ -25,9 +25,11 @@ export function figure(p: FaceParams): string {
   if (p.arms === 'down') {
     s += `<path class="f-fine" d="M40 ${y0 + 22} Q34 ${y0 + 44} 36 234 M200 ${y0 + 22} Q206 ${y0 + 44} 204 234"/>`;
   } else {
-    s += `<path class="f-fill" style="fill:${k.cloth}" d="M26 ${y0 + 34} Q120 ${y0 + 14} 214 ${y0 + 30} L216 ${y0 + 58} Q120 ${y0 + 42} 24 ${y0 + 62} Z"/>`;
-    s += `<path class="f-fine" d="M44 ${y0 + 44} Q120 ${y0 + 28} 198 ${y0 + 40}"/>`;
-    s += `<path class="f-fill" style="fill:${k.skin}" d="M196 ${y0 + 30} q12 -4 16 5 q-2 9 -14 9 Z"/><path class="f-fill" style="fill:${k.skin}" d="M44 ${y0 + 40} q-12 -2 -14 8 q4 8 14 6 Z"/>`;
+    // crossed arms sit high on the chest so they show above the desk edge (review S4)
+    const a = y0 - 22;
+    s += `<path class="f-fill" style="fill:${k.cloth}" d="M26 ${a + 34} Q120 ${a + 14} 214 ${a + 30} L216 ${a + 58} Q120 ${a + 42} 24 ${a + 62} Z"/>`;
+    s += `<path class="f-fine" d="M44 ${a + 44} Q120 ${a + 28} 198 ${a + 40}"/>`;
+    s += `<path class="f-fill" style="fill:${k.skin}" d="M196 ${a + 30} q12 -4 16 5 q-2 9 -14 9 Z"/><path class="f-fill" style="fill:${k.skin}" d="M44 ${a + 40} q-12 -2 -14 8 q4 8 14 6 Z"/>`;
   }
 
   // head
