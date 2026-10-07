@@ -19,6 +19,10 @@
   --skin-a:  #efdccb;
   --hair-a:  #8a857d;
   --cloth-a: #8995a0;
+  --skin-b:  #d9b89a;
+  --hair-b:  #2e2925;
+  --cloth-b: #b9ad9b;
+  --brick:   #a24e37;
   --eye:     #f6f3ed;
   --outside: #cfc8bc;
   --font: "AdZ Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -40,6 +44,10 @@
     --skin-a:  #cdb8a5;
     --hair-a:  #77736c;
     --cloth-a: #5f6a73;
+    --skin-b:  #b4977d;
+    --hair-b:  #1b1815;
+    --cloth-b: #857b6d;
+    --brick:   #d0805f;
     --eye:     #e6dfd2;
     --outside: #0f0e0c;
   }
@@ -62,7 +70,7 @@ q { quotes: "\201E" "\201C"; }
 
 /* Stage: room, window, Frau Brandt, desk */
 /* Small phones get a smaller stage so all three cards fit (360x640: 140 px). */
-.stage { flex: none; height: 300px; height: clamp(140px, calc(100dvh - 500px), 300px); background: var(--room); overflow: hidden; padding-top: env(safe-area-inset-top); box-sizing: content-box; }
+.stage { position: relative; flex: none; height: 300px; height: clamp(140px, calc(100dvh - 500px), 300px); background: var(--room); overflow: hidden; padding-top: env(safe-area-inset-top); box-sizing: content-box; }
 .stage svg { display: block; width: 100%; height: 100%; }
 .fig-in  { animation: fig-in .3s ease-out both; }
 .fig-out { animation: fig-out .3s ease-out both; }
@@ -123,3 +131,21 @@ q { quotes: "\201E" "\201C"; }
 /* active language: dark, bold, underlined; the other one stays muted */
 .lang button[aria-pressed="true"] { color: var(--ink); font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; }
 .lang + .start { padding-top: 0; }
+
+/* Day 2: echo quote at its fixed place top left in the stage, grey; only the echo word in brick (STIL.md).
+   A paper chip keeps the text readable on the room colour. */
+.echo { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 12px; max-width: 60%; margin: 0;
+        padding: 4px 8px; font-size: 17px; line-height: 1.3; color: var(--ink-3); background: var(--paper-2); border-radius: 3px; }
+.echo .brick { color: var(--brick); font-weight: 700; }
+.rv-face { position: relative; }
+/* Day 2: the chat sentence at the first picture, in the stage below the face */
+.stage-hint { position: absolute; left: 12px; right: 12px; bottom: 8px; padding: 4px 8px; background: var(--paper-2); border-radius: 3px; }
+.rv-face:has(.echo) { flex-direction: column; align-items: center; }
+.rv-face .echo { position: static; align-self: flex-start; max-width: none; margin: 6px 6px 0; } /* above the face, not over it */
+
+/* Day 2: chat messages. Hers left, yours right; the speaker is only read out. */
+.msg { margin: 10px 16px 0; padding: 9px 12px; max-width: 85%; width: fit-content; font-size: 17px; line-height: 1.32; border-radius: 12px; }
+.her.msg { background: var(--paper-2); border: 1.4px solid var(--rule); border-bottom-left-radius: 3px; color: var(--ink); }
+.you.msg { margin-left: auto; background: var(--paper-3); border-bottom-right-radius: 3px; color: var(--ink); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.day { font-size: 26px; line-height: 1.25; font-weight: 700; }

@@ -5,11 +5,12 @@ import { start } from './ui/app';
 const params = new URLSearchParams(location.search);
 
 if (params.get('reset') === '1') {
-  // ?reset=1 forgets the stored language and counter (only our keys: on GitHub Pages other projects share the origin),
+  // ?reset=1 forgets the stored language, counter and end of day 1 (only our keys: on GitHub Pages other projects share the origin),
   // then loads the page again without the parameter.
   try {
     localStorage.removeItem('adz.lang');
     localStorage.removeItem('adz.round');
+    localStorage.removeItem('adz.day1end');
   } catch { /* nothing stored */ }
   params.delete('reset');
   const query = params.toString();
@@ -19,7 +20,9 @@ if (params.get('reset') === '1') {
   const param = params.get('seed');
   const seed = param !== null && /^\d+$/.test(param) ? Number(param) : seedFromDate(new Date());
   // index.html has already picked the language (inline script) and set it on <html lang>.
-  start(document.getElementById('app')!, seed, document.documentElement.lang === 'de' ? 'de' : 'en');
+  // ?tag=2 starts directly at day 2 (for tests).
+  const lang = document.documentElement.lang === 'de' ? 'de' : 'en';
+  start(document.getElementById('app')!, seed, lang, params.get('tag') === '2' ? 2 : 1);
 }
 
 // Offline play: the service worker caches the built game (only in the build, not in the dev server).
