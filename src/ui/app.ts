@@ -3,12 +3,15 @@
 // #app[data-step] names the current screen; scripts/shots.js waits for it.
 import sceneJson from '../../content/tag1.json';
 import de from '../../content/de/tag1.json';
+import en from '../../content/en/tag1.json';
 import { FACES, type FaceName } from '../engine/faces';
 import { choose, hand, newGame, review, type GameState, type Scene } from '../engine/game';
 import { figure } from './figure';
 
 const scene = sceneJson as Scene;
-const text = de as Record<string, string>;
+export type Lang = 'de' | 'en';
+const TEXTS: Record<Lang, Record<string, string>> = { de, en };
+let lang: Lang = 'de';
 
 // Pauses between the beats of one exchange (ms). No screen without a card or button lasts longer than 1 s.
 const BEAT = { hand: 600, you: 400, face: 600 };
@@ -18,15 +21,47 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-const t = (id: string) => esc(text[id]);
+const t = (id: string) => esc(TEXTS[lang][id]);
 
 let app: HTMLElement;
-let seed = 0;
+let baseSeed = 0; // seed of the day, or ?seed=
+let seed = 0;     // seed of the current game
 
-export function start(root: HTMLElement, gameSeed: number): void {
+// localStorage can be missing or throw (private mode); the game works without it.
+function load(key: string): string | null {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function save(key: string, value: string): void {
+  try { localStorage.setItem(key, value); } catch { /* not stored, fine */ }
+}
+
+// Stored choice first, otherwise the browser's first language: de* -> de, anything else -> en.
+export function firstLang(): Lang {
+  const stored = load('adz.lang');
+  if (stored === 'de' || stored === 'en') return stored;
+  const first = navigator.languages?.[0] ?? navigator.language ?? '';
+  return first.toLowerCase().startsWith('de') ? 'de' : 'en';
+}
+
+function setLang(next: Lang): void {
+  lang = next;
+  document.documentElement.lang = next;
+  document.title = TEXTS[next]['ui.title'];
+}
+
+export function start(root: HTMLElement, daySeed: number, startLang: Lang): void {
   app = root;
-  seed = gameSeed;
+  baseSeed = seed = daySeed;
+  setLang(startLang);
   showStart();
+}
+
+// "Again" plays a new game: seed of the day plus a counter kept per day in localStorage.
+function nextSeed(): number {
+  const [day, count] = (load('adz.round') ?? '').split(':');
+  const n = Number(day) === baseSeed ? Number(count) + 1 : 1;
+  save('adz.round', `${baseSeed}:${n}`);
+  return baseSeed + n;
 }
 
 function setStep(step: string): void {
@@ -34,12 +69,19 @@ function setStep(step: string): void {
 }
 
 function showStart(): void {
+  const choice = (l: Lang) => `<button data-lang="${l}" aria-pressed="${l === lang}">${l.toUpperCase()}</button>`;
   app.innerHTML = `
+    <div class="lang">${choice('de')}<span aria-hidden="true">|</span>${choice('en')}</div>
     <div class="start"><h1 class="title">${t('ui.title')}</h1><p class="tagline">${t('ui.tagline')}</p></div>
     <div class="bottom"><button class="go" id="go">${t('ui.go')}</button></div>
     <p class="help">${t('ui.help')}</p>`;
   setStep('start');
   app.querySelector('#go')!.addEventListener('click', () => conversation());
+  app.querySelectorAll<HTMLButtonElement>('[data-lang]').forEach(b => b.addEventListener('click', () => {
+    setLang(b.dataset.lang as Lang);
+    save('adz.lang', lang);
+    showStart();
+  }));
 }
 
 // ---------- Conversation ----------
@@ -78,7 +120,7 @@ async function conversation(): Promise<void> {
   let state = newGame(scene, seed);
   // Lage and her first line appear together, the cards follow shortly after.
   app.innerHTML = `${stage(state.face)}<p class="caption" id="lage">${t(scene.lage)}</p>`
-    + `<div id="lines">${herLine(state.line)}</div><div id="below" hidden></div>`;
+    + `<div id="lines" aria-live="polite">${herLine(state.line)}</div><div id="below" hidden></div>`;
   const lines = app.querySelector<HTMLElement>('#lines')!;
   const below = app.querySelector<HTMLElement>('#below')!;
   below.className = 'hand';
@@ -138,7 +180,7 @@ function showReview(state: GameState): void {
     ? `<p class="y">${t('ui.you')} <q>${t(e.text)}</q></p>`
     : `<p>${t('ui.her')} <q>${t(e.text)}</q></p>`).join('');
   const steps = [
-    `<div class="rv appear"><p>${t('ui.inner')}</p><p class="inner">„${t(r.inner)}“</p></div>`,
+    `<div class="rv appear"><p>${t('ui.inner')}</p><p class="inner"><q>${t(r.inner)}</q></p></div>`,
     `<div class="rv appear"><p>${t('ui.noRight')}</p><p>${t(r.cost)}</p></div>`,
   ];
   app.innerHTML = `
@@ -164,6 +206,9 @@ function showDone(): void {
     <div class="bottom"><button class="go" id="go">${t('ui.again')}</button></div>
     <p class="help">${t('ui.help')}</p>`;
   setStep('done');
-  app.querySelector('#go')!.addEventListener('click', () => conversation());
+  app.querySelector('#go')!.addEventListener('click', () => {
+    seed = nextSeed();
+    conversation();
+  });
   window.scrollTo(0, 0);
 }

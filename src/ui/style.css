@@ -51,6 +51,7 @@ body { background: var(--outside); color: var(--ink); font-family: var(--font); 
 button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 p, h1, h2 { margin: 0; }
 q { quotes: "\201E" "\201C"; }
+:lang(en) q { quotes: "\201C" "\201D"; }
 
 /* One phone-wide column, full height, safe areas respected. */
 .app {
@@ -98,7 +99,7 @@ q { quotes: "\201E" "\201C"; }
 
 /* Review */
 .rv-face { display: flex; justify-content: center; background: var(--room); margin: calc(16px + env(safe-area-inset-top)) 16px 0; border-radius: 3px; }
-.rv-face svg { display: block; width: auto; height: 113px; height: clamp(64px, calc(100dvh - 730px), 113px); }
+.rv-face svg { display: block; width: auto; height: 113px; height: clamp(64px, calc(100dvh - 750px), 113px); }
 .log { margin: 14px 16px 0; font-size: 17px; line-height: 1.35; }
 .log p + p { margin-top: 6px; }
 .log .y { color: var(--ink-2); }
@@ -115,3 +116,9 @@ q { quotes: "\201E" "\201C"; }
 @media (prefers-reduced-motion: reduce) {
   .fig-in, .fig-out, .appear { animation-duration: 1ms; }
 }
+
+/* Language switch on the start screen: small, quiet, top right. */
+.lang { display: flex; justify-content: flex-end; align-items: center; padding: env(safe-area-inset-top) 8px 0; color: var(--ink-3); font-size: 17px; }
+.lang button { min-width: 44px; min-height: 44px; padding: 0 6px; background: none; border: 0; color: var(--ink-3); }
+.lang button[aria-pressed="true"] { color: var(--ink); font-weight: 700; }
+.lang + .start { padding-top: 0; }
