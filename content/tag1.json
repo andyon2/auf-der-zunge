@@ -1,0 +1,28 @@
+{
+  "who": "brandt",
+  "lage": "lage",
+  "opening": { "line": "brandt.open", "face": "tense" },
+  "turns": [
+    ["A", "B", "C"],
+    ["D", "E", "F"],
+    ["G", "H", "I"]
+  ],
+  "options": {
+    "A": [{ "reply": "A.reply", "face": "closed", "next": 1 }],
+    "B": [{ "reply": "B.reply", "face": "tense", "next": 1 }],
+    "C": [{ "reply": "C.reply", "face": "opening", "next": 1 }],
+    "D": [{ "reply": "D.reply", "face": "tenseAway", "end": "D" }],
+    "E": [
+      { "after": "C", "reply": "E.reply.afterC", "face": "open", "end": "E" },
+      { "reply": "E.reply", "face": "closed", "next": 2 }
+    ],
+    "F": [{ "reply": "F.reply", "face": "closed", "next": 2 }],
+    "G": [{ "reply": "G.reply", "face": "opening", "end": "G" }],
+    "H": [{ "reply": "H.reply", "face": "hard", "end": "H" }],
+    "I": [{ "reply": "I.reply", "face": "tense", "end": "I" }]
+  },
+  "review": {
+    "inner": "inner",
+    "cost": { "D": "cost.D", "E": "cost.E", "G": "cost.G", "H": "cost.H", "I": "cost.I" }
+  }
+}
