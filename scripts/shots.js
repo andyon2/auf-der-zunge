@@ -5,7 +5,7 @@
 // Checks: blocklist, digits (only the clock time), max 3 lines per sentence, font >= 17 px,
 // touch targets >= 44 px, cards / button / cost line inside the viewport, nothing sticking out sideways,
 // no stretch longer than 1 s without a card or button (timers run on Playwright's fake clock), console errors.
-// Extra runs: ?reset=1 with locale en-US and de-DE shows the start screen in that language;
+// Extra runs: ?reset=1 with locale en-US and de-DE shows the start screen in that language, forgets the end of day 1 (day 2 then starts with the plain sentence);
 // offline: after one visit the page reloads without network and the game plays (service worker).
 // Run: npm run shots [-- <dir>] (builds first). Output: <dir>/<lang>/<path>/NN-<step>.png, <dir>/reset/, <dir>/offline/
 // (<dir> defaults to shots)
@@ -110,6 +110,7 @@ async function checkDay2(page, run, step) {
     echoText: document.querySelector('.echo:not([hidden])')?.textContent ?? '',
     hint: [...document.querySelectorAll('.caption')].map(c => c.textContent),
     cost: [...document.querySelectorAll('.rv p')].map(p => p.textContent),
+    say: document.querySelector('#echo-say')?.textContent ?? null,
   }));
   const m = step.match(/^(you|face|hand)-(\d)$/);
   const n = m ? Number(m[2]) : 0;
@@ -127,6 +128,15 @@ async function checkDay2(page, run, step) {
   const chatWanted = step === 'her' || step === 'hand-1';
   if (st.hint.includes(L.t2['ui.chatHint']) !== chatWanted) out.push(`Chat-Satz ${chatWanted ? 'fehlt' : 'steht da'}`);
   if (m && m[1] === 'face' && st.face !== run.faces[n - 1]) out.push(`Gesicht ${st.face} statt ${run.faces[n - 1]}`);
+  // screen readers: when the echo comes or goes, #echo-say (aria-live) says it, the first time with the explaining sentence
+  if (m && m[1] === 'face') {
+    const prev = n > 1 ? run.echo[n - 2] : null;
+    if (want !== prev) {
+      const say = want ? (n === first ? `${L.t2['ui.echoHint']} ` : '') + L.t2[want] : L.t2['ui.echoGone'];
+      if (st.say !== say) out.push(`Ansage "${st.say}" statt "${say}"`);
+    }
+  }
+  if (step === 'her' && st.say !== '') out.push(`Ansage zu Beginn "${st.say}"`);
   if (step === 'review-3' && !st.cost.includes(L.t2[`cost.${run.end}`])) out.push(`Kostenzeile ${run.end} fehlt`);
   return out;
 }
@@ -181,6 +191,10 @@ for (const run of RUNS) {
     await snap(`face-${t}`);
   }
   await snap('over');
+  if (!run.day) { // day 1 stores its end for the start sentence of day 2
+    const stored = await page.evaluate(() => localStorage.getItem('adz.day1end'));
+    if (stored !== run.picks.at(-1)) warn(`${dir}: adz.day1end "${stored}" statt ${run.picks.at(-1)}`);
+  }
   for (const step of ['review-1', 'review-2', 'review-3']) {
     await page.click('#go');
     await snap(step);
@@ -208,6 +222,7 @@ for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
   const { context, page } = await phone(`reset-${lang}`, { locale: LANGS[lang].locale });
   await page.goto(url);
   await page.click(`[data-lang="${other}"]`); // stores the other language
+  await page.evaluate(() => localStorage.setItem('adz.day1end', 'E')); // as after day 1 with end E
   await page.reload();
   if (await page.locator('html').getAttribute('lang') !== other) warn(`reset-${lang}: Umschalter auf ${other} nicht gespeichert`);
   await page.goto(`${url}&reset=1`);
@@ -223,6 +238,15 @@ for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
   const active = await page.getAttribute('[aria-pressed="true"]', 'data-lang');
   if (active !== lang) warn(`${file}: Umschalter zeigt ${active} als aktiv`);
   for (const f of await check(page, lang)) warn(`${file}: ${f}`);
+  // the end of day 1 is gone, so day 2 starts with the plain sentence
+  const end1 = await page.evaluate(() => localStorage.getItem('adz.day1end'));
+  if (end1 !== null) warn(`${file}: adz.day1end nach Reset "${end1}"`);
+  await page.goto(`${url}&tag=2`);
+  await page.waitForSelector('#app[data-step="day2"]');
+  const line = await page.textContent('h1.day');
+  if (line !== LANGS[lang].t2['ui.day2']) warn(`${file}: Tag-2-Satz nach Reset "${line}"`);
+  await page.screenshot({ path: `${OUT}/reset/${LANGS[lang].locale}-tag2.png` });
+  shots++;
   await context.close();
 }
 
