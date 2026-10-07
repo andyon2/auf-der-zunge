@@ -92,10 +92,13 @@ function showStart(): void {
 }
 
 // Start of day 2: one sentence, it names Kessler if day 1 ended with E or G (stored in adz.day1end).
+export function day2Line(day1End: string | null): string {
+  return day1End === 'E' || day1End === 'G' ? 'ui.day2.kessler' : 'ui.day2';
+}
+
 function showDay2(): void {
   day = 2;
-  const end1 = load('adz.day1end');
-  const line = end1 === 'E' || end1 === 'G' ? 'ui.day2.kessler' : 'ui.day2';
+  const line = day2Line(load('adz.day1end'));
   app.innerHTML = `
     <div class="start"><h1 class="day">${t(line)}</h1></div>
     <div class="bottom"><button class="go" id="go">${t('ui.next')}</button></div>
@@ -121,7 +124,7 @@ function stage(face: FaceName): string {
     <rect x="${wx}" y="40" width="86" height="130" fill="var(--window)" stroke="var(--rule)" stroke-width="4"/>
     <path d="M${wx + 43} 40 V170" stroke="var(--rule)" stroke-width="4"/>
     <g transform="translate(${tx} ${ty}) scale(${sc})"><g class="fig">${figure(FACES[face], scene().who)}</g></g>${desk}
-  </svg><p class="echo" id="echo" hidden></p></div>`;
+  </svg><p class="echo" id="echo" hidden></p></div><p class="sr" id="echo-say" aria-live="polite"></p>`;
 }
 
 // The echo: a quote at its fixed place top left in the stage, grey, only the brick word in --brick.
@@ -164,7 +167,7 @@ async function conversation(): Promise<void> {
   let echoExplained = false;
   // Lage and her first line appear together, the cards follow shortly after. .once lines go with the next answer.
   // Day 2: the chat sentence sits in the stage, below the face, so 360x640 keeps room for the cards (bericht M3).
-  app.innerHTML = `${stage(state.face)}<div id="hints" aria-live="polite"><p class="caption once" id="lage">${t(sc.lage)}</p></div>`
+  app.innerHTML = `${stage(state.face)}<div id="hints"><p class="caption once" id="lage">${t(sc.lage)}</p></div>`
     + `<div id="lines" aria-live="polite">${herLine(state.line)}</div><div id="below" hidden></div>`;
   const hints = app.querySelector<HTMLElement>('#hints')!;
   if (chat()) app.querySelector('.stage')!.insertAdjacentHTML('beforeend', `<p class="caption once stage-hint">${t('ui.chatHint')}</p>`);
@@ -188,11 +191,19 @@ async function conversation(): Promise<void> {
     setStep(`you-${n}`);
     await wait(BEAT.you);
     changeFace(state.face);
+    const before = app.dataset.echo;
     setEcho(state.echo);
-    // The first echo of the game gets its one explaining sentence, until the next answer.
+    // Screen readers hear the echo once when it comes and a short line when it goes (#echo-say, aria-live).
+    // The first echo of the game gets its one explaining sentence, until the next answer; it is read in the same
+    // announcement, so #hints itself is not a live region and nothing is read twice.
+    let say = '';
     if (state.echo && !echoExplained) {
       echoExplained = true;
       hints.insertAdjacentHTML('beforeend', `<p class="caption once appear" id="echo-hint">${t('ui.echoHint')}</p>`);
+      say = `${t('ui.echoHint')} `;
+    }
+    if ((state.echo ?? '') !== before) {
+      app.querySelector('#echo-say')!.innerHTML = say + (state.echo ? t(state.echo) : t('ui.echoGone'));
     }
     setStep(`face-${n}`);
     await wait(BEAT.face);
