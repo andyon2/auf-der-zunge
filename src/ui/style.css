@@ -1,0 +1,114 @@
+/* Atkinson Hyperlegible only if installed locally. Digits are excluded (slashed zero), they come from system-ui. */
+@font-face { font-family: "AdZ Text"; font-weight: 400; src: local("Atkinson Hyperlegible"), local("AtkinsonHyperlegible-Regular");
+             unicode-range: U+0020-002F, U+003A-024F, U+2010-206F; }
+@font-face { font-family: "AdZ Text"; font-weight: 700; src: local("Atkinson Hyperlegible Bold"), local("AtkinsonHyperlegible-Bold");
+             unicode-range: U+0020-002F, U+003A-024F, U+2010-206F; }
+
+/* ---------- Tokens light ---------- */
+:root {
+  --paper:   #ece7de;
+  --paper-2: #f6f3ed;
+  --paper-3: #e2dcd1;
+  --ink:     #1f1d1a;
+  --ink-2:   #4d4840;
+  --ink-3:   #6e675c;
+  --rule:    #cbc3b5;
+  --room:    #ddd5c8;
+  --window:  #b4bec4;
+  --fig-ink: #1f1d1a;
+  --skin-a:  #efdccb;
+  --hair-a:  #8a857d;
+  --cloth-a: #8995a0;
+  --eye:     #f6f3ed;
+  --outside: #cfc8bc;
+  --font: "AdZ Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light dark;
+}
+/* ---------- Tokens dark ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper:   #1c1a17;
+    --paper-2: #27241f;
+    --paper-3: #312d27;
+    --ink:     #ece5d8;
+    --ink-2:   #c3baab;
+    --ink-3:   #9a9183;
+    --rule:    #3e3933;
+    --room:    #2b2824;
+    --window:  #3c454c;
+    --fig-ink: #13110e;
+    --skin-a:  #cdb8a5;
+    --hair-a:  #77736c;
+    --cloth-a: #5f6a73;
+    --eye:     #e6dfd2;
+    --outside: #0f0e0c;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--outside); color: var(--ink); font-family: var(--font); -webkit-text-size-adjust: 100%; }
+button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+p, h1, h2 { margin: 0; }
+q { quotes: "\201E" "\201C"; }
+
+/* One phone-wide column, full height, safe areas respected. */
+.app {
+  max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh;
+  background: var(--paper); display: flex; flex-direction: column;
+  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Stage: room, window, Frau Brandt, desk */
+.stage { flex: none; height: min(300px, 38dvh); background: var(--room); overflow: hidden; padding-top: env(safe-area-inset-top); box-sizing: content-box; }
+.stage svg { display: block; width: 100%; height: 100%; }
+.fig-in  { animation: fig-in .45s ease-out both; }
+.fig-out { animation: fig-out .45s ease-out both; }
+@keyframes fig-in  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes fig-out { from { opacity: 1 } to { opacity: 0 } }
+
+.caption { padding: 12px 16px 0; font-size: 17px; line-height: 1.35; color: var(--ink-2); }
+.her { padding: 12px 16px 0; font-size: 20px; line-height: 1.3; }
+.you { padding: 12px 16px 0; font-size: 17px; line-height: 1.35; color: var(--ink-2); }
+.over { padding: 18px 16px 0; font-size: 17px; line-height: 1.35; font-weight: 700; }
+.appear { animation: fig-in .3s ease-out both; }
+
+.hand { padding: 16px 16px 20px; margin-top: auto; }
+.hand h2 { margin: 0 0 10px; font-size: 18px; font-weight: 700; line-height: 1.3; }
+.say { display: block; width: 100%; min-height: 48px; text-align: left; font-size: 17px; line-height: 1.32; color: var(--ink);
+       background: var(--paper-2); border: 1.4px solid var(--rule); border-radius: 3px; padding: 11px 14px; margin: 0 0 8px;
+       box-shadow: 0 2px 0 -1px var(--rule); }
+.say:last-child { margin-bottom: 0; }
+.say:active { background: var(--paper-3); }
+
+.go { display: block; width: 100%; min-height: 56px; font-size: 18px; font-weight: 700; background: var(--ink); color: var(--paper-2);
+      border: 0; border-radius: 3px; }
+.go:focus-visible, .say:focus-visible { outline: 3px solid var(--ink-2); outline-offset: 2px; }
+.bottom { padding: 16px 16px 24px; margin-top: auto; }
+
+/* Start and end */
+.start { padding: calc(16px + env(safe-area-inset-top)) 16px 0; margin: auto 0; }
+.title { font-size: 40px; line-height: 1.05; font-weight: 700; margin: 0 0 14px; letter-spacing: -.01em; }
+.tagline { font-size: 19px; line-height: 1.35; color: var(--ink-2); max-width: 320px; }
+.start + .bottom { margin-top: 0; }
+.help { font-size: 14px; line-height: 1.3; color: var(--ink-3); padding: 0 16px 14px; }
+
+/* Review */
+.rv-face { display: flex; justify-content: center; background: var(--room); margin: calc(20px + env(safe-area-inset-top)) 16px 0; border-radius: 3px; }
+.rv-face svg { display: block; }
+.log { margin: 14px 16px 0; font-size: 17px; line-height: 1.35; }
+.log p + p { margin-top: 6px; }
+.log .y { color: var(--ink-2); }
+.rv { margin: 14px 16px 0; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 17px; line-height: 1.35; }
+.rv .inner { font-style: italic; color: var(--ink-3); }
+
+/* Figure lines */
+.f-ln   { fill: none; stroke: var(--fig-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.f-fine { fill: none; stroke: var(--fig-ink); stroke-width: 1.4; stroke-linecap: round; }
+.f-fill { stroke: var(--fig-ink); stroke-width: 2.2; stroke-linejoin: round; }
+.f-dot  { fill: var(--fig-ink); }
+.f-eye  { fill: var(--eye); stroke: var(--fig-ink); stroke-width: 1.8; stroke-linejoin: round; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fig-in, .fig-out, .appear { animation-duration: 1ms; }
+}
