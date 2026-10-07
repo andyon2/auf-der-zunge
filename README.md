@@ -18,7 +18,7 @@ Stand: Meilenstein 2, Tag 1 (Frau Brandt, Freitag 16:50), Deutsch und Englisch, 
 | `npm run shots` | Build, dann Playwright in DE und EN, je in 390x844, 360x640 und 375x667: Bilder nach `shots/<sprache>/<pfad>/`, dazu `shots/reset/` (Sprache aus dem Browser) und `shots/offline/` (ohne Netz gespielt), Prüfung von Sperrliste, Zahlen, Zeilen, Schrift, Tippflächen, Karten und Knopf im Bild, Takt (nie über 1 s ohne Karte oder Knopf), Konsolenfehlern |
 
 Debug: `?seed=123` legt die Reihenfolge der Karten fest (sonst Seed aus dem Datum).
-`?reset=1` vergisst gespeicherte Sprache und Rundenzähler und lädt die Seite ohne den Parameter neu.
+`?reset=1` vergisst gespeicherte Sprache und Rundenzähler (nur diese zwei Einträge) und lädt die Seite ohne den Parameter neu.
 
 Sprache: beim ersten Start aus der Browsersprache (de* → Deutsch, sonst Englisch), umschaltbar auf dem Startbildschirm („DE | EN“).
 

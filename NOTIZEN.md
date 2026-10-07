@@ -14,6 +14,7 @@ Umlaute und Auslassungspunkte (…) sind im Spiel typografisch gesetzt; das zaeh
 | G (Antwort nach E, M1b) | Die Preise. Der Text hat Zeit bis Montag zehn. Machen Sie die Preise, dann gehen Sie. | …Die Preise. Wenn die stimmen, kann der Text bis Montag zehn warten. Dann gehen Sie. | Review S2: Nach "Nein. Montag früh heißt Montag früh." fehlte der Uebergang. Eigene Antwort mit after "E", die alte bleibt fuer A-F-G, B-F-G, C-F-G. Vom Dirigenten vorgegeben war "… Machen Sie die Preise, dann gehen Sie."; das ergab 4 Zeilen auch bei 390 px. "Machen Sie die Preise," ist gestrichen, die Aufforderung steckt in "Wenn die stimmen". |
 | Innensatz | Wenn Kessler noch mal Fehler findet, bin ich dran. | Mein Chef hat gefragt, ob ich Kessler noch im Griff habe. Ich weiß es selbst nicht. | Pflichtpunkt 3: Der alte Satz wiederholte ihre Antwort nach C. Der neue zeigt Neues: die Angst vor dem eigenen Chef. "Mein Chef" (nicht Chefin) ist eine freie Wahl ohne Vorgabe im Skript (Review K1); es unterscheidet ihn im Lesen von ihr selbst, "Deine Chefin". |
 | Kostenzeile Pfad H (M2) | Du gehst. Der Satz bleibt zwischen euch. | Du gehst. Aber sie hat es sich gemerkt. | Review M2: "Der Satz" war unklar (welcher Satz, deiner oder ihrer?). Die neue Zeile knuepft an ihr "Aber das merk ich mir." an und nennt den Preis direkt. 1 bis 2 Zeilen. EN: "You leave. But she won't forget it." |
+| Kostenzeile Pfad G (M2b) | Heute noch die Preise. | Du bleibst heute noch für die Preise. | Tester 8 (V10 M2): unklar, was wen gekostet hat. Der Satz nennt jetzt dich und den Preis (du bleibst). 1 Zeile bei 390, 1 bei 360. EN: "Staying late today for the prices." |
 | Rueckblick, Kostenzeile | Was es gekostet hat: | Es gibt kein Richtig. Das hat es gekostet: | Pflichtpunkt 5. Wortlaut aus der Synthese, Punkt durch Doppelpunkt ersetzt, weil der Preis darunter folgt. |
 
 ## Neue Texte (nicht im Skript)
@@ -58,6 +59,7 @@ Umlaute und Auslassungspunkte (…) sind im Spiel typografisch gesetzt; das zaeh
 - Innensatz: nur im Rueckblick (kern-minimal: im Gespraech erst Tag 2). Der Rueckblick zeigt Zeile fuer Zeile: Gesicht und Gesagtes, dann Innensatz, dann Preis.
 - "Noch mal" (seit M2, Review K7) startet mit neuem Seed: Seed des Tages (oder `?seed=`) plus Zaehler. Der Zaehler
   steht in localStorage (`adz.round` = "Tagesseed:n") und beginnt an jedem neuen Tag bei 1. Ohne localStorage bleibt es bei n = 1.
+  Seit M2b reine Funktion `nextRound()` in `src/engine/rng.ts` mit Unit-Test.
 - Rueckblick (seit M2, Review K3): erster Eintrag ist ihre Eroeffnung ("Sie: …"), dann Zug fuer Zug. Das macht `review()` in der Engine.
 - Ihre Antworten stehen in `#lines` mit `aria-live="polite"` (Review K6); Screenreader lesen neue Saetze vor, ohne zu unterbrechen.
 - Die Hilfe-Fusszeile hat 14 px (Regel >= 17 px gilt fuer die Saetze des Spiels).
@@ -78,9 +80,25 @@ ist erlaubt, gesperrt ist das Nomen "needs" (Beduerfnis).
 | "Sie:" im Rueckblick | She: | "Her:" klingt falsch vor einem Satz. |
 | B-Antwort | I know it's ten to five. Kessler doesn't. | Woertlich waere "I know what time it is", "time" ist gesperrt. |
 | C-Antwort | …Yes. He found two mistakes in the last one. | "Last time" ist gesperrt ("time"). |
-| Noch mal | Again | "One more time" ist gesperrt. |
-| Hilfe-Fusszeile | Fear or violence: there is help in your country | Wie DE ohne Link. |
+| Noch mal | Play again (M2b, vorher "Again") | Review M2 K1. "One more time" ist gesperrt. |
+| Hilfe-Fusszeile | Afraid, or facing violence? There is help in your country. (M2b) | Review M2 S1, vorher "Fear or violence: there is help in your country". Wie DE ohne Link. |
+| I-Antwort (M2b) | Good for you. I still want the proposal on my desk first thing Monday. | Review M2 M1: "The proposal is still on my desk" klang, als laege es schon dort. |
+| C-Antwort (M2b) | …Yes. He found two mistakes in the last proposal. | Review M2 S1: "the last one" war unklar. |
+| Kostenzeile E (M2b) | Staying until six for the rough version. | Review M2 S1: vorher "The rough version, today until six."; nennt jetzt, was du tust. |
 | Anfuehrungszeichen | “…” | `:lang(en) q` in style.css; DE bleibt „…“. |
+
+Umschalter (M2b, Tester 7 und Review K4): aktive Sprache dunkel, fett und unterstrichen, die andere gedaempft (--ink-3);
+Tippflaechen 48 x 48 px wie STIL.md (vorher 44). shots.js prueft 48 px und welche Sprache als aktiv markiert ist.
+
+Sprache vor dem ersten Bild (M2b, Review K6): ein kleines Inline-Skript in `index.html` setzt `<html lang>` und den
+Seitentitel aus `adz.lang` bzw. `navigator.languages[0]`, bevor das Hauptskript laedt; `src/main.ts` liest nur noch
+`<html lang>`. Die beiden Titel stehen dort ein zweites Mal (Inline-Skript kann kein JSON importieren).
+
+`?reset=1` (M2b, Review S2) entfernt nur `adz.lang` und `adz.round`, kein `localStorage.clear()`: auf GitHub Pages
+teilen sich alle Projektseiten eines Kontos die Origin.
+
+Gespraechszeilen (M2b, Review S4): werden nur angehaengt, aeltere entfernt; `aria-live` liest so nur die neue Zeile.
+Sichtbar bleiben wie vorher zwei Zeilen. Mit echtem Screenreader nicht geprueft.
 
 Sprachwahl: beim ersten Start aus `navigator.languages[0]` (de* -> DE, sonst EN), danach aus localStorage (`adz.lang`).
 Umschalter "DE | EN" klein oben rechts nur auf dem Startbildschirm. `?reset=1` leert localStorage und laedt ohne den Parameter neu.
@@ -88,7 +106,8 @@ Beide Sprachdateien sind im JS-Bundle (statischer Import); der Service Worker ca
 
 Service Worker: `src/sw.js` ist eine Vorlage; das Vite-Plugin in `vite.config.ts` schreibt beim Build `dist/sw.js` mit
 der Liste aller gebauten Dateien und einem Cache-Namen aus dem Inhalts-Hash (`adz-<12 Zeichen>`). Alte `adz-*`-Caches
-loescht `activate`. Seiten: erst Netz, offline aus dem Cache; Dateien: erst Cache. `ignoreVary`, weil der Vite-Server
+loescht `activate`. Install laedt mit `cache: 'reload'` am HTTP-Cache vorbei (M2b, Review S3: Pages liefert HTML mit max-age=600,
+sonst konnte ein altes index.html mit alten Asset-Namen im neuen Cache landen). Seiten: erst Netz, offline aus dem Cache; Dateien: erst Cache. `ignoreVary`, weil der Vite-Server
 `Vary: Origin` sendet und Skripte sonst offline nicht aus dem Cache kamen. Im Dev-Server ist kein Service Worker aktiv.
 
 ## Offen
