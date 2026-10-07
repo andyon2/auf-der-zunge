@@ -1,0 +1,355 @@
+{
+ "de": [
+  {
+   "name": "Polizei-Notruf",
+   "name_de": "Polizei-Notruf",
+   "name_en": "Police emergency",
+   "number": "110",
+   "url": "https://www.bundesnetzagentur.de/DE/Fachthemen/Telekommunikation/Nummerierung/Notruf/start.html",
+   "hours": "bundesweit einheitliche Rufnummer der Polizei",
+   "langs": [
+    "de"
+   ],
+   "source": "https://www.bundesnetzagentur.de/DE/Fachthemen/Telekommunikation/Nummerierung/Notruf/start.html",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Hilfetelefon Gewalt gegen Frauen",
+   "name_de": "Hilfetelefon Gewalt gegen Frauen",
+   "name_en": "Violence against women helpline",
+   "number": "116 016",
+   "url": "https://www.hilfetelefon.de",
+   "hours": "rund um die Uhr, an 365 Tagen im Jahr",
+   "langs": [
+    "de",
+    "18 weitere Sprachen",
+    "Deutsche Gebaerdensprache"
+   ],
+   "source": "https://www.hilfetelefon.de",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Maennerhilfetelefon",
+   "name_de": "Hilfetelefon Gewalt an Männern",
+   "name_en": "Helpline for men facing violence",
+   "number": "0800 1239900",
+   "url": "https://www.maennerhilfetelefon.de",
+   "hours": "Mo-Do 8-20 Uhr, Fr 8-15 Uhr, kostenlos",
+   "langs": [
+    "de",
+    "en",
+    "tr"
+   ],
+   "source": "https://www.maennerhilfetelefon.de",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "TelefonSeelsorge",
+   "name_de": "TelefonSeelsorge",
+   "name_en": "TelefonSeelsorge crisis line",
+   "number": "0800 1110111 / 0800 1110222 / 116 123",
+   "url": "https://www.telefonseelsorge.de",
+   "hours": "rund um die Uhr, kostenlos",
+   "langs": [
+    "de"
+   ],
+   "source": "https://www.telefonseelsorge.de",
+   "checked": "2026-10-07"
+  }
+ ],
+ "at": [
+  {
+   "name": "Polizei-Notruf",
+   "name_de": "Polizei-Notruf",
+   "name_en": "Police emergency",
+   "number": "133",
+   "url": "https://www.bmi.gv.at/notrufnummern/start.html",
+   "hours": "Euro-Notruf 112 ebenfalls moeglich",
+   "langs": [
+    "de"
+   ],
+   "source": "https://www.bmi.gv.at/notrufnummern/start.html",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "FRAUEN-HELPLINE Oesterreich",
+   "name_de": "Frauen-Helpline gegen Gewalt",
+   "name_en": "Women's helpline against violence",
+   "number": "0800/222 555",
+   "url": "https://www.frauenhelpline.at",
+   "hours": "rund um die Uhr, kostenlos, anonym, vertraulich",
+   "langs": [
+    "de",
+    "en",
+    "tr",
+    "ro",
+    "ru",
+    "hr",
+    "ar",
+    "fa",
+    "u.a."
+   ],
+   "source": "https://www.frauenhelpline.at",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Maenner-Infokrisentelefon",
+   "name_de": "Männer-Krisentelefon",
+   "name_en": "Men's crisis line",
+   "number": "0800 400 777",
+   "url": "https://www.maennerinfo.at",
+   "hours": "24/7, kostenlos, vertraulich",
+   "langs": [
+    "de",
+    "weitere Sprachen telefonisch"
+   ],
+   "source": "https://www.maennerinfo.at",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Telefonseelsorge Oesterreich",
+   "name_de": "Telefonseelsorge",
+   "name_en": "Telefonseelsorge crisis line",
+   "number": "142",
+   "url": "https://www.telefonseelsorge.at",
+   "hours": "rund um die Uhr, kostenlos, vertraulich",
+   "langs": [
+    "de"
+   ],
+   "source": "https://www.telefonseelsorge.at",
+   "checked": "2026-10-07"
+  }
+ ],
+ "ch": [
+  {
+   "name": "Polizei",
+   "name_de": "Polizei-Notruf",
+   "name_en": "Police emergency",
+   "number": "117",
+   "url": "https://www.kkpks.ch/de",
+   "hours": "Notruf; auch 112",
+   "langs": [
+    "de",
+    "fr",
+    "it"
+   ],
+   "source": "https://www.kkpks.ch/de",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Opferhilfe Schweiz",
+   "name_de": "Opferhilfe Schweiz",
+   "name_en": "Victim support Switzerland",
+   "number": "142",
+   "url": "https://www.opferhilfe-schweiz.ch",
+   "hours": "nationale Nummer der Opferhilfe; keine Notrufnummer",
+   "langs": [
+    "de",
+    "fr",
+    "it",
+    "en",
+    "rm"
+   ],
+   "source": "https://www.opferhilfe-schweiz.ch",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Die Dargebotene Hand",
+   "name_de": "Die Dargebotene Hand",
+   "name_en": "Die Dargebotene Hand (Swiss crisis line)",
+   "number": "143",
+   "url": "https://www.143.ch",
+   "hours": "rund um die Uhr, kostenlos",
+   "langs": [
+    "de",
+    "fr",
+    "it",
+    "en (0800 143 000, 18-23 Uhr)"
+   ],
+   "source": "https://www.143.ch",
+   "checked": "2026-10-07"
+  }
+ ],
+ "gb": [
+  {
+   "name": "999",
+   "name_de": "Notruf Polizei",
+   "name_en": "Police emergency",
+   "number": "999",
+   "url": "https://www.gov.uk/report-crime",
+   "hours": "bei unmittelbarer Gefahr oder laufender Straftat",
+   "langs": [
+    "en"
+   ],
+   "source": "https://www.gov.uk/report-crime",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "National Domestic Abuse Helpline",
+   "name_de": "Hilfe bei häuslicher Gewalt",
+   "name_en": "National Domestic Abuse Helpline",
+   "number": "0808 2000 247",
+   "url": "https://www.nationaldahelpline.org.uk",
+   "hours": "24 Stunden, 365 Tage, kostenlos",
+   "langs": [
+    "en",
+    "many other languages",
+    "BSL Mo-Fr 10-18 Uhr"
+   ],
+   "source": "https://www.nationaldahelpline.org.uk",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Men's Advice Line",
+   "name_de": "Hilfe für Männer bei Gewalt",
+   "name_en": "Men's Advice Line",
+   "number": "0808 8010327",
+   "url": "https://mensadviceline.org.uk",
+   "hours": "Mo-Fr 10-17 Uhr, kostenlos",
+   "langs": [
+    "en"
+   ],
+   "source": "https://mensadviceline.org.uk",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Samaritans",
+   "name_de": "Samaritans Krisentelefon",
+   "name_en": "Samaritans",
+   "number": "116 123",
+   "url": "https://www.samaritans.org/how-we-can-help/contact-samaritan/",
+   "hours": "24 Stunden, 365 Tage, kostenlos",
+   "langs": [
+    "en"
+   ],
+   "source": "https://www.samaritans.org/how-we-can-help/contact-samaritan/",
+   "checked": "2026-10-07"
+  }
+ ],
+ "us": [
+  {
+   "name": "911",
+   "name_de": "Polizei-Notruf",
+   "name_en": "Police emergency",
+   "number": "911",
+   "url": "https://www.justice.gov/ovw/domestic-violence",
+   "hours": "bei unmittelbarer Gefahr",
+   "langs": [
+    "en"
+   ],
+   "source": "https://www.justice.gov/ovw/domestic-violence",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "National Domestic Violence Hotline",
+   "name_de": "Hotline häusliche Gewalt",
+   "name_en": "National Domestic Violence Hotline",
+   "number": "1-800-799-SAFE (7233)",
+   "url": "https://www.thehotline.org",
+   "hours": "24/7, kostenlos; Chat; TTY 800-787-3224",
+   "langs": [
+    "en",
+    "es"
+   ],
+   "source": "https://www.thehotline.org",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "988 Suicide & Crisis Lifeline",
+   "name_de": "Krisentelefon (Lifeline)",
+   "name_en": "Suicide & Crisis Lifeline",
+   "number": "988",
+   "url": "https://988lifeline.org",
+   "hours": "24/7/365, kostenlos, Anruf, SMS oder Chat",
+   "langs": [
+    "en",
+    "es"
+   ],
+   "source": "https://988lifeline.org",
+   "checked": "2026-10-07"
+  }
+ ],
+ "ie": [
+  {
+   "name": "An Garda Siochana",
+   "name_de": "Notruf Polizei",
+   "name_en": "Garda emergency",
+   "number": "999 / 112",
+   "url": "https://www.garda.ie",
+   "hours": "im Notfall immer 999/112",
+   "langs": [
+    "en"
+   ],
+   "source": "https://www.garda.ie",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Women's Aid",
+   "name_de": "Women's Aid Helpline",
+   "name_en": "Women's Aid helpline",
+   "number": "1800 341 900",
+   "url": "https://www.womensaid.ie",
+   "hours": "24 Stunden, 7 Tage, kostenlos",
+   "langs": [
+    "en"
+   ],
+   "source": "https://www.womensaid.ie",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Men's Aid Ireland",
+   "name_de": "Men's Aid Helpline",
+   "name_en": "Men's Aid helpline",
+   "number": "01 554 3811",
+   "url": "https://www.mensaid.ie",
+   "hours": "Mo-Fr 9-17 Uhr",
+   "langs": [
+    "en"
+   ],
+   "source": "https://www.mensaid.ie",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "Samaritans Ireland",
+   "name_de": "Samaritans Krisentelefon",
+   "name_en": "Samaritans",
+   "number": "116 123",
+   "url": "https://www.samaritans.org/ireland/samaritans-ireland/",
+   "hours": "rund um die Uhr, kostenlos",
+   "langs": [
+    "en"
+   ],
+   "source": "https://www.samaritans.org/ireland/samaritans-ireland/",
+   "checked": "2026-10-07"
+  }
+ ],
+ "intl": [
+  {
+   "name": "Find A Helpline",
+   "name_de": "Verzeichnis Hilfetelefone weltweit",
+   "name_en": "Find a Helpline (worldwide)",
+   "number": "",
+   "url": "https://findahelpline.com",
+   "hours": "Verzeichnis, 175+ Laender, Telefon/Text/Chat",
+   "langs": [
+    "en",
+    "viele"
+   ],
+   "source": "https://findahelpline.com",
+   "checked": "2026-10-07"
+  },
+  {
+   "name": "112 Europaeischer Notruf",
+   "name_de": "EU-Notruf",
+   "name_en": "EU emergency number",
+   "number": "112",
+   "url": "https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/index_en.htm",
+   "hours": "kostenlos in allen EU-Laendern",
+   "langs": [
+    "viele"
+   ],
+   "source": "https://europa.eu/youreurope/citizens/travel/security-and-emergencies/emergency/index_en.htm",
+   "checked": "2026-10-07"
+  }
+ ]
+}
