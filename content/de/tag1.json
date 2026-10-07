@@ -47,5 +47,17 @@
   "ui.done": "Für heute ist das alles.",
   "ui.again": "Noch mal",
   "ui.stage": "Frau Brandt am Schreibtisch",
-  "ui.face": "Frau Brandt"
+  "ui.face": "Frau Brandt",
+
+  "ui.helpSafe": "Bei Angst oder Gewalt schuldest du niemandem Verständnis. Sicherheit geht vor.",
+  "ui.helpLand": "Land:",
+  "ui.land.de": "Deutschland",
+  "ui.land.at": "Österreich",
+  "ui.land.ch": "Schweiz",
+  "ui.land.gb": "Vereinigtes Königreich",
+  "ui.land.us": "USA",
+  "ui.land.ie": "Irland",
+  "ui.land.intl": "Weitere Länder",
+  "ui.helpChecked": "Quellen geprüft am",
+  "ui.back": "Zurück"
 }

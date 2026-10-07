@@ -47,5 +47,17 @@
   "ui.done": "That's all for today.",
   "ui.again": "Play again",
   "ui.stage": "Ms Brandt at her desk",
-  "ui.face": "Ms Brandt"
+  "ui.face": "Ms Brandt",
+
+  "ui.helpSafe": "Afraid, or facing violence? You owe no one understanding. Safety comes first.",
+  "ui.helpLand": "Country:",
+  "ui.land.de": "Germany",
+  "ui.land.at": "Austria",
+  "ui.land.ch": "Switzerland",
+  "ui.land.gb": "United Kingdom",
+  "ui.land.us": "United States",
+  "ui.land.ie": "Ireland",
+  "ui.land.intl": "Other countries",
+  "ui.helpChecked": "Sources checked on",
+  "ui.back": "Back"
 }

@@ -1,6 +1,7 @@
 import './ui/style.css';
 import { seedFromDate } from './engine/rng';
 import { start } from './ui/app';
+import { detectLand } from './engine/help';
 
 const params = new URLSearchParams(location.search);
 
@@ -22,7 +23,9 @@ if (params.get('reset') === '1') {
   // index.html has already picked the language (inline script) and set it on <html lang>.
   // ?tag=2 starts directly at day 2 (for tests).
   const lang = document.documentElement.lang === 'de' ? 'de' : 'en';
-  start(document.getElementById('app')!, seed, lang, params.get('tag') === '2' ? 2 : 1);
+  // Country of the help page from the browser; ?land=xx overrides, ?hilfe=1 opens the help page directly (both for tests).
+  const land = detectLand(navigator.languages ?? [navigator.language], Intl.DateTimeFormat().resolvedOptions().timeZone, params.get('land'));
+  start(document.getElementById('app')!, seed, lang, params.get('tag') === '2' ? 2 : 1, land, params.get('hilfe') === '1');
 }
 
 // Offline play: the service worker caches the built game (only in the build, not in the dev server).

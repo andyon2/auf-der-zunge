@@ -8,10 +8,12 @@ import de1 from '../../content/de/tag1.json';
 import en1 from '../../content/en/tag1.json';
 import de2 from '../../content/de/tag2.json';
 import en2 from '../../content/en/tag2.json';
+import helpJson from '../../content/help.json';
 import { FACES, type FaceName } from '../engine/faces';
 import { choose, hand, newGame, review, type GameState, type Scene } from '../engine/game';
 import { figure } from './figure';
 import { nextRound } from '../engine/rng';
+import { phoneLinks, type Land } from '../engine/help';
 
 export type Lang = 'de' | 'en';
 export type Day = 1 | 2;
@@ -38,6 +40,7 @@ const t = (id: string) => esc(TEXTS[lang][day][id]);
 
 let app: HTMLElement;
 let baseSeed = 0; // seed of the day, or ?seed=
+let land: Land = 'intl'; // country of the help page, from the browser (src/engine/help.ts)
 let seed = 0;     // seed of the current game
 
 // localStorage can be missing or throw (private mode); the game works without it.
@@ -54,12 +57,17 @@ function setLang(next: Lang): void {
   document.title = TEXTS[next][1]['ui.title'];
 }
 
-export function start(root: HTMLElement, daySeed: number, startLang: Lang, startDay: Day = 1): void {
+export function start(root: HTMLElement, daySeed: number, startLang: Lang, startDay: Day = 1,
+  startLand: Land = 'intl', help = false): void {
   app = root;
   baseSeed = seed = daySeed;
+  land = startLand;
   setLang(startLang);
   if (startDay === 2) showDay2();
   else showStart();
+  // Every help hint (start, day 2, review, end) opens the help page inside the game; ?hilfe=1 opens it at once.
+  app.addEventListener('click', e => { if ((e.target as Element).closest('[data-help]')) openHelp(); });
+  if (help) openHelp();
 }
 
 // "Again" plays a new game; the counter lives in localStorage.
@@ -80,7 +88,7 @@ function showStart(): void {
     <div class="lang">${choice('de')}<span aria-hidden="true">|</span>${choice('en')}</div>
     <div class="start"><h1 class="title">${t('ui.title')}</h1><p class="tagline">${t('ui.tagline')}</p></div>
     <div class="bottom"><button class="go" id="go">${t('ui.go')}</button></div>
-    <p class="help">${t('ui.help')}</p>`;
+    ${helpHint()}`;
   setStep('start');
   window.scrollTo(0, 0);
   app.querySelector('#go')!.addEventListener('click', () => conversation());
@@ -102,7 +110,7 @@ function showDay2(): void {
   app.innerHTML = `
     <div class="start"><h1 class="day">${t(line)}</h1></div>
     <div class="bottom"><button class="go" id="go">${t('ui.next')}</button></div>
-    <p class="help">${t('ui.help')}</p>`;
+    ${helpHint()}`;
   setStep('day2');
   window.scrollTo(0, 0);
   app.querySelector('#go')!.addEventListener('click', () => conversation());
@@ -258,7 +266,8 @@ function showReview(state: GameState): void {
     + (r.echo ? `<p class="echo" id="echo">${echoHtml(r.echo)}</p>` : '') + `</div>
     <div class="log">${log}</div>
     <div id="more"></div>
-    <div class="bottom"><button class="go" id="go">${t('ui.next')}</button></div>`;
+    <div class="bottom"><button class="go" id="go">${t('ui.next')}</button></div>
+    ${helpHint()}`;
   app.dataset.echo = r.echo ?? '';
   const more = app.querySelector<HTMLElement>('#more')!;
   window.scrollTo(0, 0);
@@ -276,7 +285,7 @@ function showDone(): void {
   app.innerHTML = `
     <div class="start"><h1 class="title">${t('ui.title')}</h1><p class="tagline">${t('ui.done')}</p></div>
     <div class="bottom"><button class="go" id="go">${t('ui.again')}</button></div>
-    <p class="help">${t('ui.help')}</p>`;
+    ${helpHint()}`;
   setStep('done');
   app.dataset.echo = '';
   app.querySelector('#go')!.addEventListener('click', () => {
@@ -286,4 +295,70 @@ function showDone(): void {
     conversation();
   });
   window.scrollTo(0, 0);
+}
+
+// ---------- Help page (Spielkonzept 8) ----------
+
+type HelpEntry = { name_de: string; name_en: string; number: string; url: string; hours: string; checked: string };
+const HELP = helpJson as Record<Land, HelpEntry[]>;
+
+const helpHint = () => `<p class="help"><button class="help-link" data-help>${t('ui.help')}</button></p>`;
+
+function helpHtml(shown: Land): string {
+  const entries = HELP[shown];
+  const items = entries.map(e => {
+    const tel = phoneLinks(e.number).map(n => `<a class="tel" href="tel:${n.tel}">${esc(n.text)}</a>`).join('');
+    const host = new URL(e.url).hostname.replace(/^www\./, '');
+    // hours exist only in German (help.json); the English page marks them as German
+    return `<li><h2 class="hname">${esc(lang === 'de' ? e.name_de : e.name_en)}</h2>`
+      + (tel ? `<p class="nums">${tel}</p>` : '')
+      + `<p class="hours"${lang === 'de' ? '' : ' lang="de"'}>${esc(e.hours)}</p>`
+      + `<p><a class="web" href="${esc(e.url)}" target="_blank" rel="noopener">${esc(host)}</a></p></li>`;
+  }).join('');
+  // the oldest date of the shown entries
+  const checked = entries.map(e => e.checked).sort()[0];
+  const date = new Date(`${checked}T12:00:00`).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  // switch between the detected country and the international list (nothing to switch if nothing was detected)
+  const other = shown === 'intl' ? land : 'intl';
+  const toggle = land === 'intl' ? '' : `<button class="switch">${t(`ui.land.${other}`)}</button>`;
+  return `<h1 class="safe" tabindex="-1">${t('ui.helpSafe')}</h1>
+    <ul class="hlist">${items}</ul>
+    <p class="hland">${t('ui.helpLand')} ${t(`ui.land.${shown}`)}</p>${toggle}
+    <p class="hchecked">${t('ui.helpChecked')} ${esc(date)}</p>
+    <div class="bottom"><button class="go" id="back">${t('ui.back')}</button></div>`;
+}
+
+// The game is only hidden, not replaced: "Back" puts the same nodes back, so state, listeners and step stay as they were.
+function openHelp(): void {
+  const step = app.dataset.step ?? '';
+  const y = window.scrollY;
+  const game = document.createElement('div');
+  game.hidden = true;
+  game.append(...app.childNodes);
+  const view = document.createElement('div');
+  view.className = 'helpview';
+  app.append(game, view);
+  let shown = land;
+  const render = () => {
+    view.innerHTML = helpHtml(shown);
+    app.dataset.land = shown;
+    view.querySelector('.switch')?.addEventListener('click', () => {
+      shown = shown === 'intl' ? land : 'intl';
+      render();
+      view.querySelector<HTMLElement>('.switch')!.focus();
+    });
+    view.querySelector('#back')!.addEventListener('click', () => {
+      view.remove();
+      app.append(...game.childNodes);
+      game.remove();
+      delete app.dataset.land;
+      setStep(step);
+      window.scrollTo(0, y);
+      app.querySelector<HTMLElement>('[data-help]')?.focus();
+    });
+  };
+  render();
+  setStep('help');
+  window.scrollTo(0, 0);
+  view.querySelector<HTMLElement>('.safe')!.focus();
 }
