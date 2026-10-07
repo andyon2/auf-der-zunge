@@ -23,3 +23,11 @@ export function shuffle<T>(items: readonly T[], rand: () => number): T[] {
   }
   return out;
 }
+
+// "Again" plays a new game: seed of the day plus a counter that starts again on each new day.
+// stored is the saved "daySeed:n" (or null); returns the new seed and what to save.
+export function nextRound(stored: string | null, daySeed: number): { seed: number; stored: string } {
+  const [day, count] = (stored ?? '').split(':');
+  const n = Number(day) === daySeed ? (Number(count) || 0) + 1 : 1;
+  return { seed: daySeed + n, stored: `${daySeed}:${n}` };
+}

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import sceneJson from '../../content/tag1.json';
 import de from '../../content/de/tag1.json';
 import { choose, hand, newGame, review, type GameState, type Scene } from './game';
-import { mulberry32, seedFromDate, shuffle } from './rng';
+import { mulberry32, nextRound, seedFromDate, shuffle } from './rng';
 import { FACES } from './faces';
 
 const scene = sceneJson as Scene;
@@ -90,5 +90,20 @@ describe('rng', () => {
       expect(x >= 0 && x < 1).toBe(true);
     }
     expect(shuffle([1, 2, 3], mulberry32(1)).sort()).toEqual([1, 2, 3]);
+  });
+});
+
+describe('nextRound ("Again")', () => {
+  it('adds a counter to the seed of the day', () => {
+    expect(nextRound(null, 20261007)).toEqual({ seed: 20261008, stored: '20261007:1' });
+    expect(nextRound('20261007:1', 20261007)).toEqual({ seed: 20261009, stored: '20261007:2' });
+  });
+
+  it('starts the counter again on a new day', () => {
+    expect(nextRound('20261007:5', 20261008)).toEqual({ seed: 20261009, stored: '20261008:1' });
+  });
+
+  it('survives a broken stored value', () => {
+    expect(nextRound('20261007:x', 20261007)).toEqual({ seed: 20261008, stored: '20261007:1' });
   });
 });

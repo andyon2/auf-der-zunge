@@ -7,7 +7,7 @@
   "B": "It's ten to five, and I've got plans tonight.",
   "B.reply": "I know it's ten to five. Kessler doesn't.",
   "C": "Is this about making sure Kessler doesn't find any mistakes?",
-  "C.reply": "…Yes. He found two mistakes in the last one. That's not happening to me again.",
+  "C.reply": "…Yes. He found two mistakes in the last proposal. That's not happening to me again.",
 
   "D": "Fine, I'll stay. Like always.",
   "D.reply": "Good. See you Monday.",
@@ -24,11 +24,11 @@
   "H": "You can't keep springing this on me every Friday.",
   "H.reply": "…Fine. Go. But I won't forget this.",
   "I": "I've got concert tickets. This matters to me.",
-  "I.reply": "Good for you. The proposal is still on my desk first thing Monday.",
+  "I.reply": "Good for you. I still want the proposal on my desk first thing Monday.",
 
   "inner": "My boss asked me if I still have Kessler under control. I'm not sure I do.",
-  "cost.E": "The rough version, today until six.",
-  "cost.G": "The prices, before you leave today.",
+  "cost.E": "Staying until six for the rough version.",
+  "cost.G": "Staying late today for the prices.",
   "cost.D": "Your Friday evening.",
   "cost.H": "You leave. But she won't forget it.",
   "cost.I": "You don't know if there'll be trouble on Monday.",
@@ -36,7 +36,7 @@
   "ui.title": "Tip of the Tongue",
   "ui.tagline": "Someone wants something from you, and you're working out what to say.",
   "ui.go": "Start",
-  "ui.help": "Fear or violence: there is help in your country",
+  "ui.help": "Afraid, or facing violence? There is help in your country.",
   "ui.ask": "What do you say?",
   "ui.you": "You:",
   "ui.her": "She:",
@@ -45,7 +45,7 @@
   "ui.noRight": "There's no right answer. This is what it cost:",
   "ui.next": "Next",
   "ui.done": "That's all for today.",
-  "ui.again": "Again",
+  "ui.again": "Play again",
   "ui.stage": "Ms Brandt at her desk",
   "ui.face": "Ms Brandt"
 }
