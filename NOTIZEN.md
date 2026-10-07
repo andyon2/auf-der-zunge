@@ -144,6 +144,20 @@ auch Lage, Echo-Zitate, Innensatz, Kostenzeilen, Start-Saetze, Einmal-Saetze und
   (Buchstabe des Endes); bei E oder G nennt der Start Tag 2 Kessler, fehlt der Wert, der Standardsatz.
   `?tag=2` startet direkt beim Start Tag 2; `?reset=1` loescht auch `adz.day1end`.
 
+### Nachbesserung 3b
+
+- Erklaersatz beim ersten Echo (V10: nur einer von drei Testern verstand das Echo sofort, "Oben steht, was." wurde als
+  Satzbruch gelesen): DE "Was oben steht, bleibt im Raum hängen." (Vorgabe Synthese M3), EN "What's up top still hangs in the air."
+  ("hangs in the air" ist die gelaeufige Wendung fuer etwas Gesagtes, das nachwirkt). Weiterhin nur einmal, weg mit der naechsten Antwort.
+- Screenreader (Review M3 Pflicht 1): eigene unsichtbare Zeile `#echo-say` (aria-live polite). Kommt ein Echo, liest sie das
+  Echo-Zitat, beim ersten Echo mit dem Erklaersatz davor in derselben Ansage. Geht es (R1, R2), liest sie neuen Text `ui.echoGone`
+  DE "Oben steht nichts mehr." / EN "Nothing up top any more." (ohne Vorlage, nur fuer Screenreader). `#hints` ist dafuer keine
+  live-Region mehr, so wird der Erklaersatz nicht doppelt gelesen. Mit echtem Screenreader nicht geprueft.
+- Tests (Review Pflicht 2): `day2Line()` in `src/ui/app.ts` waehlt den Startsatz, Vitest `src/ui/app.test.ts` (E, G, D, H, I,
+  leer, unbekannt). shots.js prueft nach jedem Tag-1-Lauf `adz.day1end`, im Reset-Lauf dass `?reset=1` ein gesetztes
+  `adz.day1end` loescht und `?tag=2` danach den Standardsatz zeigt, und je Echo-Wechsel den Text von `#echo-say`.
+  Gegenprobe: mit absichtlich entfernter Ansage bzw. ohne Loeschen beim Reset meldet shots.js 12 bzw. 4 Befunde.
+
 ### Englisch Tag 2
 
 Eigener Text, gleicher Ton. Jule schreibt klein, ohne Smileys; Namen Jule, Leo, Tom bleiben.
@@ -155,7 +169,15 @@ Eigener Text, gleicher Ton. Jule schreibt klein, ohne Smileys; Namen Jule, Leo, 
 | R1 | Sorry, that was snippy. I could take Leo from two. | "sharp" steht auf der Sperrliste. |
 | Kostenzeile G | You have Leo from two, and she won't be asking you again soon. | "any time soon" ginge nicht ("time"). |
 | Start Tag 2 | Day two. Jule sent you a message. / … Kessler has his proposal, and Jule sent you a message. | "has written" klingt nach Brief. |
-| Einmal-Saetze | Here you see what you never see in a chat. / Some things you say stay hanging in the room. Up top you see which. | nah am Deutschen, kein "echo" (Sperrliste). |
+| Einmal-Saetze | Here you see what you never see in a chat. / What's up top still hangs in the air. (3b) | kein "echo" (Sperrliste). |
+| E (3b) | I'm helping with the move till two. Then I'll take Leo. | Review M3: "I'm at the move" unidiomatisch. Vorschlag "I'm helping with the move in the morning. I'll take Leo from two." hat 66 Zeichen (Skript-Marke 61); "till two" sagt dasselbe kuerzer, Jules Antworten "from two" passen weiter. |
+| C.reply (3b) | …yeah. i've been doing everything alone for weeks. i can't do this anymore. | Review M3, Vorschlag uebernommen. |
+| R2.reply (3b) | it's fine. from two helps. i'll get the morning sorted. | Review M3, Vorschlag uebernommen (DE "krieg ich hin"). |
+| E.reply.afterC (3b) | from two would already help. it's just the morning i can't manage. | Review M3: "would be a lot" klang nach "zu viel". Vorschlag "would already be something" sinngemaess, "already help" kuerzer und gelaeufiger. |
+| G (3b) | You can still manage the morning, can't you? | Review M3, Vorschlag uebernommen (weniger gestelzt als "Surely ..."). |
+| ui.write (3b) | What do you write back? | Review M3, Vorschlag uebernommen; Jule hat immer zuletzt geschrieben. |
+| R2 | Sorry, that thing about Tom was dumb. I'll take Leo from two. | Review-Vorschlag "that Tom remark" nicht uebernommen: klingt foermlicher, der Satz ist umgangssprachlich. |
+| D, H | ... cancel on my brother ... | bleibt (Synthese M3, Tester 12: idiomatisch). |
 
 ## Offen
 
