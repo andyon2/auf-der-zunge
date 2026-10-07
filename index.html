@@ -8,15 +8,12 @@
   <meta name="theme-color" content="#1c1a17" media="(prefers-color-scheme: dark)">
   <title>Auf der Zunge</title>
   <script>
-    // Language before anything is shown: stored choice, otherwise the browser's first language (de* -> de, else en).
+    // Language before anything is shown: the stored choice (DE | EN switch), otherwise always German; the browser language is ignored.
     // src/main.ts reads the result from <html lang>.
     (function () {
       var lang = null;
       try { lang = localStorage.getItem('adz.lang'); } catch (e) { /* no storage */ }
-      if (lang !== 'de' && lang !== 'en') {
-        var first = (navigator.languages && navigator.languages[0]) || navigator.language || '';
-        lang = first.toLowerCase().indexOf('de') === 0 ? 'de' : 'en';
-      }
+      if (lang !== 'de' && lang !== 'en') lang = 'de';
       document.documentElement.lang = lang;
       document.title = lang === 'de' ? 'Auf der Zunge' : 'Tip of the Tongue';
     })();

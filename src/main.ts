@@ -7,7 +7,7 @@ const params = new URLSearchParams(location.search);
 
 if (params.get('reset') === '1') {
   // ?reset=1 forgets the stored language, counter and end of day 1 (only our keys: on GitHub Pages other projects share the origin),
-  // then loads the page again without the parameter.
+  // then loads the page again (the language is German again) without the parameter.
   try {
     localStorage.removeItem('adz.lang');
     localStorage.removeItem('adz.round');

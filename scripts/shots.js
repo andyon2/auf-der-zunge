@@ -1,11 +1,11 @@
 // Plays every path of day 1 and the test paths of day 2 (skript-tag2.md) in German and English with a fixed seed
 // in 390x844, 360x640 and 375x667 and takes one screenshot per screen. Day 1 runs go on to the start of day 2
 // (Kessler sentence after the ends E and G); day 2 runs start with ?tag=2 and end with "Noch mal" back at day 1.
-// Day 2 per step: echo shown or not, the echo sentence only at the first echo, face preset, cost line of the end. The language comes from the browser locale (de-DE / en-US).
+// Day 2 per step: echo shown or not, the echo sentence only at the first echo, face preset, cost line of the end. The language is stored for the English runs (locale en-US), German is the default.
 // Checks: blocklist, digits (only the clock time), max 3 lines per sentence, font >= 17 px,
 // touch targets >= 44 px, cards / button / cost line inside the viewport, nothing sticking out sideways,
 // no stretch longer than 1 s without a card or button (timers run on Playwright's fake clock), console errors.
-// Extra runs: ?reset=1 with locale en-US and de-DE shows the start screen in that language, forgets the end of day 1 (day 2 then starts with the plain sentence);
+// Extra runs: ?reset=1 with locale en-US and de-DE shows the start screen in German (the browser language does not matter), forgets the end of day 1 (day 2 then starts with the plain sentence);
 // offline: after one visit the page reloads without network and the game plays (service worker).
 // Help page (M4): every country (?land=xx&hilfe=1) in DE and EN, 390x844 light and dark, 360x640; entries, tel: and web links,
 // switch to the international list and back, "Back" to the start. Ways back from the start, the review, day 2 and the end
@@ -110,9 +110,11 @@ let findings = 0, errors = 0, shots = 0;
 const warn = msg => { findings++; console.log(`WARN ${msg}`); };
 
 // A fresh phone-like browser context with an empty localStorage; console errors are counted.
-async function phone(name, { viewport = BIG, locale = 'de-DE', dark = false } = {}) {
+// The game starts in German whatever the browser language is; lang 'en' stores the choice like the DE | EN switch does.
+async function phone(name, { viewport = BIG, locale = 'de-DE', dark = false, lang = 'de' } = {}) {
   const context = await browser.newContext({ viewport, deviceScaleFactor: 1, locale,
     colorScheme: dark ? 'dark' : 'light', hasTouch: true, isMobile: true });
+  if (lang === 'en') await context.addInitScript(() => { try { if (!localStorage.getItem('adz.lang')) localStorage.setItem('adz.lang', 'en'); } catch { /* none */ } });
   const page = await context.newPage();
   page.on('console', m => { if (m.type() === 'error') { errors++; console.log(`FEHLER ${name} console: ${m.text()}`); } });
   page.on('pageerror', e => { errors++; console.log(`FEHLER ${name} page: ${e.message}`); });
@@ -202,7 +204,7 @@ async function checkDay2(page, run, step) {
 for (const run of RUNS) {
   const dir = `${OUT}/${run.lang}/${run.name}`;
   mkdirSync(dir, { recursive: true });
-  const { context, page } = await phone(`${run.lang}/${run.name}`, { viewport: run.viewport, locale: LANGS[run.lang].locale, dark: run.dark });
+  const { context, page } = await phone(`${run.lang}/${run.name}`, { viewport: run.viewport, locale: LANGS[run.lang].locale, dark: run.dark, lang: run.lang });
   await page.clock.install();
 
   // Advance the fake clock in 100 ms steps until the screen is reached; count time without card or button.
@@ -297,7 +299,7 @@ for (const land of LANDS) for (const lang of Object.keys(LANGS)) for (const [vp,
   const name = `${land}-${vp.width}${dark ? '-dunkel' : ''}`;
   const dir = `${OUT}/hilfe/${lang}`;
   mkdirSync(dir, { recursive: true });
-  const { context, page } = await phone(`hilfe/${lang}/${name}`, { viewport: vp, locale: LANGS[lang].locale, dark });
+  const { context, page } = await phone(`hilfe/${lang}/${name}`, { viewport: vp, locale: LANGS[lang].locale, dark, lang });
   await page.goto(`${url}&land=${land}&hilfe=1`);
   await page.waitForSelector('#app[data-step="help"]');
   const look = async (file, shown) => {
@@ -333,9 +335,10 @@ for (const [locale, timezoneId, want] of [['de-AT', 'Europe/Berlin', 'at'], ['en
 }
 console.log('Land aus Browsersprache und Zeitzone: 11 Faelle geprueft');
 
-// ?reset=1: the stored language is forgotten, the browser language decides, the parameter is gone.
+// ?reset=1: the stored language is forgotten, German is the default again, the parameter is gone.
 mkdirSync(`${OUT}/reset`, { recursive: true });
-for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
+for (const lang of ['en', 'de']) { // browser language; the game is German after the reset either way
+  const other = 'en';
   const { context, page } = await phone(`reset-${lang}`, { locale: LANGS[lang].locale });
   await page.goto(url);
   await page.click(`[data-lang="${other}"]`); // stores the other language
@@ -348,20 +351,20 @@ for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
   const file = `${OUT}/reset/${LANGS[lang].locale}-start.png`;
   await page.screenshot({ path: file });
   shots++;
-  const want = LANGS[lang].t1['ui.title'];
+  const want = LANGS.de.t1['ui.title'];
   const title = await page.textContent('.title');
   if (title !== want) warn(`${file}: Titel "${title}" statt "${want}"`);
   if (await page.title() !== want) warn(`${file}: Seitentitel "${await page.title()}"`);
   const active = await page.getAttribute('[aria-pressed="true"]', 'data-lang');
-  if (active !== lang) warn(`${file}: Umschalter zeigt ${active} als aktiv`);
-  for (const f of await check(page, lang)) warn(`${file}: ${f}`);
+  if (active !== 'de') warn(`${file}: Umschalter zeigt ${active} als aktiv`);
+  for (const f of await check(page, 'de')) warn(`${file}: ${f}`);
   // the end of day 1 is gone, so day 2 starts with the plain sentence
   const end1 = await page.evaluate(() => localStorage.getItem('adz.day1end'));
   if (end1 !== null) warn(`${file}: adz.day1end nach Reset "${end1}"`);
   await page.goto(`${url}&tag=2`);
   await page.waitForSelector('#app[data-step="day2"]');
   const line = await page.textContent('h1.day');
-  if (line !== LANGS[lang].t2['ui.day2']) warn(`${file}: Tag-2-Satz nach Reset "${line}"`);
+  if (line !== LANGS.de.t2['ui.day2']) warn(`${file}: Tag-2-Satz nach Reset "${line}"`);
   await page.screenshot({ path: `${OUT}/reset/${LANGS[lang].locale}-tag2.png` });
   shots++;
   await context.close();

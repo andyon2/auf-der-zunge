@@ -242,3 +242,10 @@ Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft
 - Auf 360x640 ist die Buehne nur 140 px hoch, das Gesicht dort klein, der Tisch endet sichtbar vor dem Rand. Geprueft sind 390x844, 360x640, 375x667, nur in Chromium.
 - Englischer Text ist nicht von einer Muttersprachlerin gegengelesen.
 - Offline nur in Chromium (Playwright) auf localhost geprueft; Safari auf iOS und GitHub Pages ungeprueft.
+
+## 2026-10-07 Nachtrag E12
+
+- Deutsch ist Standard: `index.html` nimmt ohne gespeicherte Wahl `adz.lang` immer `de`; die Browsersprache zaehlt nur noch fuer die Hilfe-Seite (`detectLand`). `?reset=1` fuehrt damit zu Deutsch. `scripts/shots.js` speichert fuer die englischen Laeufe `adz.lang=en` vorab und erwartet nach `?reset=1` auf beiden Locales Deutsch.
+- Zurueck-Geste: ein Verlaufseintrag je Oberflaeche ausser dem Startbild (Gespraech, Rueckblick-Schritte, Tag 2, Ende, Hilfe), gleiche URL. Hilfe und Rueckblick-Schritte folgen der Geste; Gespraech, `review-1`, Tag 2 und Ende holen sie mit `history.go()` zurueck (kein neues `pushState`, das braucht keine Nutzergeste). `#back` ruft `history.back()`.
+- Kein Test fuer `popstate` in `app.test.ts`: die Testumgebung ist `node`, jsdom ist nicht installiert (keine neue Abhaengigkeit dafuer). Abgedeckt ist es durch den Playwright-Durchlauf (Hilfe, Gespraech, Rueckblick, Tag 2, `?hilfe=1`). Die Sprachwahl ist in `app.test.ts` getestet (Inline-Script aus `index.html` mit Stubs ausgefuehrt).
+- Offen: Verhalten nur in Chromium (Desktop-Emulation) geprueft, nicht auf Chrome Android oder iOS Safari mit echter Zurueck-Geste. Nach Reload auf einem Rueckblick-Eintrag zeigt Zurueck frueher gespielte Eintraege als neue Seite (Startbild); gewollt, da kein Spielstand gespeichert wird.

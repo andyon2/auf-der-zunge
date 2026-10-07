@@ -63,6 +63,8 @@ export function start(root: HTMLElement, daySeed: number, startLang: Lang, start
   baseSeed = seed = daySeed;
   land = startLand;
   setLang(startLang);
+  history.replaceState({ i: 0 }, '');
+  window.addEventListener('popstate', onPop);
   if (startDay === 2) showDay2();
   else showStart();
   // Every help hint (start, day 2, review, end) opens the help page inside the game; ?hilfe=1 opens it at once.
@@ -75,6 +77,36 @@ function nextSeed(): number {
   const round = nextRound(load('adz.round'), baseSeed);
   save('adz.round', round.stored);
   return round.seed;
+}
+
+// ---------- Browser history ----------
+// The back gesture switches between screens and never undoes a played card. Every screen except the start pushes one
+// entry (same URL). A pop that no screen wants is undone with history.go(): that needs no user gesture, unlike a new
+// pushState (Chrome skips entries added without one), so it is the reliable trap on Chrome Android.
+// Entries carry { i, step }; i is the position among the entries this page pushed (the page itself is 0, so a state
+// left over from before a reload is ignored).
+let idx = 0;
+let reviewAt: ((n: number) => void) | null = null; // set while the review is on screen
+let closeHelp: (() => void) | null = null;          // set while the help page is open
+const push = (step: string) => history.pushState({ i: ++idx, step }, '');
+// Enter a screen that is not the start (and not a review step or the help page).
+function enter(step: string): void {
+  reviewAt = null;
+  push(step);
+}
+
+function onPop(e: PopStateEvent): void {
+  const s = e.state as { i?: number; step?: string } | null;
+  if (typeof s?.i !== 'number' || s.i === idx) return; // foreign state, or the pop that undoes a refused one
+  if (closeHelp) {
+    idx = s.i;
+    closeHelp();
+  } else if (reviewAt && s.step?.startsWith('review-')) {
+    idx = s.i;
+    reviewAt(Number(s.step.slice(7)));
+  } else {
+    history.go(idx - s.i); // stay where we are: conversation, day 2, end, start of review
+  }
 }
 
 function setStep(step: string): void {
@@ -111,6 +143,7 @@ function showDay2(): void {
     <div class="start"><h1 class="day">${t(line)}</h1></div>
     <div class="bottom"><button class="go" id="go">${t('ui.next')}</button></div>
     ${helpHint()}`;
+  enter('day2');
   setStep('day2');
   window.scrollTo(0, 0);
   app.querySelector('#go')!.addEventListener('click', () => conversation());
@@ -170,6 +203,7 @@ const youLine = (id: string) => chat()
   : `<p class="you appear">${t('ui.you')} <q>${t(id)}</q></p>`;
 
 async function conversation(): Promise<void> {
+  enter('play');
   const sc = scene();
   let state = newGame(sc, seed);
   let echoExplained = false;
@@ -272,12 +306,20 @@ function showReview(state: GameState): void {
   const more = app.querySelector<HTMLElement>('#more')!;
   window.scrollTo(0, 0);
   let shown = 0;
+  enter('review-1');
   setStep('review-1');
+  // Back / forward between the steps; a pop below review-1 is refused in onPop.
+  reviewAt = n => {
+    more.innerHTML = steps.slice(0, n - 1).join('');
+    shown = n - 1;
+    setStep(`review-${n}`);
+  };
   app.querySelector('#go')!.addEventListener('click', () => {
     if (shown === steps.length) return day === 1 ? showDay2() : showDone();
     more.insertAdjacentHTML('beforeend', steps[shown++]);
     app.querySelector('#go')!.scrollIntoView({ block: 'end' });
     setStep(`review-${shown + 1}`);
+    push(`review-${shown + 1}`);
   });
 }
 
@@ -286,6 +328,7 @@ function showDone(): void {
     <div class="start"><h1 class="title">${t('ui.title')}</h1><p class="tagline">${t('ui.done')}</p></div>
     <div class="bottom"><button class="go" id="go">${t('ui.again')}</button></div>
     ${helpHint()}`;
+  enter('done');
   setStep('done');
   app.dataset.echo = '';
   app.querySelector('#go')!.addEventListener('click', () => {
@@ -346,16 +389,19 @@ function openHelp(): void {
       render();
       view.querySelector<HTMLElement>('.switch')!.focus();
     });
-    view.querySelector('#back')!.addEventListener('click', () => {
-      view.remove();
-      app.append(...game.childNodes);
-      game.remove();
-      delete app.dataset.land;
-      setStep(step);
-      window.scrollTo(0, y);
-      app.querySelector<HTMLElement>('[data-help]')?.focus();
-    });
+    view.querySelector('#back')!.addEventListener('click', () => history.back()); // closeHelp runs in onPop
   };
+  closeHelp = () => {
+    closeHelp = null;
+    view.remove();
+    app.append(...game.childNodes);
+    game.remove();
+    delete app.dataset.land;
+    setStep(step);
+    window.scrollTo(0, y);
+    app.querySelector<HTMLElement>('[data-help]')?.focus();
+  };
+  push('help');
   render();
   setStep('help');
   window.scrollTo(0, 0);
