@@ -1,26 +1,33 @@
-// Plays day 1 with a fixed seed in 390x844 (and 360x640, 375x667) and takes one screenshot per screen.
-// Checks: blocklist, digits (only "16:50"), max 3 lines per sentence, font >= 17 px,
+// Plays every path of day 1 in German and English with a fixed seed in 390x844, 360x640 and 375x667
+// and takes one screenshot per screen. The language comes from the browser locale (de-DE / en-US).
+// Checks: blocklist, digits (only the clock time), max 3 lines per sentence, font >= 17 px,
 // touch targets >= 44 px, cards / button / cost line inside the viewport, nothing sticking out sideways,
 // no stretch longer than 1 s without a card or button (timers run on Playwright's fake clock), console errors.
-// Run: npm run shots (builds first). Output: shots/<path>/NN-<step>.png
+// Extra runs: ?reset=1 with locale en-US and de-DE shows the start screen in that language;
+// offline: after one visit the page reloads without network and the game plays (service worker).
+// Run: npm run shots (builds first). Output: shots/<lang>/<path>/NN-<step>.png, shots/reset/, shots/offline/
 import { chromium } from 'playwright';
 import { preview } from 'vite';
 import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 
 const SEED = 20261007;
-const BLOCK = JSON.parse(readFileSync(new URL('../content/blocklist.json', import.meta.url)));
+const json = file => JSON.parse(readFileSync(new URL(`../content/${file}`, import.meta.url)));
+const LANGS = {
+  de: { locale: 'de-DE', block: json('blocklist.json'), clock: '16:50', title: json('de/tag1.json')['ui.title'] },
+  en: { locale: 'en-US', block: json('blocklist-en.json'), clock: '4:50', title: json('en/tag1.json')['ui.title'] },
+};
 const PATHS = { 'A-E-G': ['A', 'E', 'G'], 'B-D': ['B', 'D'], 'C-E': ['C', 'E'], 'A-F-H': ['A', 'F', 'H'], 'B-F-I': ['B', 'F', 'I'] };
 const BIG = { width: 390, height: 844 }, SMALL = { width: 360, height: 640 }, MID = { width: 375, height: 667 };
-const RUNS = [
-  ...Object.entries(PATHS).map(([name, picks]) => ({ name, picks, viewport: BIG })),
-  { name: 'dunkel-C-E', picks: PATHS['C-E'], viewport: BIG, dark: true },
-  ...Object.entries(PATHS).map(([name, picks]) => ({ name: `360-${name}`, picks, viewport: SMALL })),
-  { name: '375-A-E-G', picks: PATHS['A-E-G'], viewport: MID },
-];
+const RUNS = Object.keys(LANGS).flatMap(lang => [
+  ...Object.entries(PATHS).map(([name, picks]) => ({ lang, name, picks, viewport: BIG })),
+  { lang, name: 'dunkel-C-E', picks: PATHS['C-E'], viewport: BIG, dark: true },
+  ...Object.entries(PATHS).map(([name, picks]) => ({ lang, name: `360-${name}`, picks, viewport: SMALL })),
+  ...Object.entries(PATHS).map(([name, picks]) => ({ lang, name: `375-${name}`, picks, viewport: MID })),
+]);
 const MAX_IDLE = 1000; // ms without a visible card or button
 
-function check(page) {
-  return page.evaluate(BLOCK => {
+function check(page, lang) {
+  return page.evaluate(({ BLOCK, CLOCK, LANG }) => {
     const out = [];
     const W = innerWidth, H = innerHeight;
     document.querySelectorAll('.caption, .her, .you, .say, .over, .log p, .rv p, .title, .tagline, .help').forEach(el => {
@@ -49,10 +56,11 @@ function check(page) {
     });
     const text = document.body.innerText + ' ' + [...document.querySelectorAll('[aria-label]')].map(e => e.getAttribute('aria-label')).join(' ');
     BLOCK.forEach(w => { if (text.toLowerCase().includes(w.toLowerCase())) out.push(`Sperrwort "${w}"`); });
-    const digits = text.replace(/16:50/g, '').match(/\d+/g);
+    const digits = text.split(CLOCK).join('').match(/\d+/g);
     if (digits) out.push(`Zahl ${digits.join(',')}`);
+    if (de.lang !== LANG) out.push(`html lang ${de.lang} statt ${LANG}`);
     return out;
-  }, BLOCK);
+  }, { BLOCK: LANGS[lang].block, CLOCK: LANGS[lang].clock, LANG: lang });
 }
 
 const server = await preview({ preview: { port: 4179, strictPort: true }, logLevel: 'silent' });
@@ -61,13 +69,22 @@ const browser = await chromium.launch();
 rmSync('shots', { recursive: true, force: true });
 
 let findings = 0, errors = 0, shots = 0;
+const warn = msg => { findings++; console.log(`WARN ${msg}`); };
+
+// A fresh phone-like browser context with an empty localStorage; console errors are counted.
+async function phone(name, { viewport = BIG, locale = 'de-DE', dark = false } = {}) {
+  const context = await browser.newContext({ viewport, deviceScaleFactor: 1, locale,
+    colorScheme: dark ? 'dark' : 'light', hasTouch: true, isMobile: true });
+  const page = await context.newPage();
+  page.on('console', m => { if (m.type() === 'error') { errors++; console.log(`FEHLER ${name} console: ${m.text()}`); } });
+  page.on('pageerror', e => { errors++; console.log(`FEHLER ${name} page: ${e.message}`); });
+  return { context, page };
+}
+
 for (const run of RUNS) {
-  const dir = `shots/${run.name}`;
+  const dir = `shots/${run.lang}/${run.name}`;
   mkdirSync(dir, { recursive: true });
-  const page = await browser.newPage({ viewport: run.viewport, deviceScaleFactor: 1,
-    colorScheme: run.dark ? 'dark' : 'light', hasTouch: true, isMobile: true });
-  page.on('console', m => { if (m.type() === 'error') { errors++; console.log(`FEHLER ${run.name} console: ${m.text()}`); } });
-  page.on('pageerror', e => { errors++; console.log(`FEHLER ${run.name} page: ${e.message}`); });
+  const { context, page } = await phone(`${run.lang}/${run.name}`, { viewport: run.viewport, locale: LANGS[run.lang].locale, dark: run.dark });
   await page.clock.install();
 
   // Advance the fake clock in 100 ms steps until the screen is reached; count time without card or button.
@@ -77,7 +94,7 @@ for (const run of RUNS) {
       if (ms > 10000) throw new Error(`${run.name}: ${step} nicht erreicht`);
       const active = await page.evaluate(() => [...document.querySelectorAll('.say, #go')].some(el => !el.closest('[hidden]')));
       idle = active ? 0 : idle + 100;
-      if (idle > MAX_IDLE) { findings++; console.log(`WARN ${run.name}: vor ${step} ueber ${MAX_IDLE} ms ohne Karte oder Knopf`); idle = -1e9; }
+      if (idle > MAX_IDLE) { warn(`${dir}: vor ${step} ueber ${MAX_IDLE} ms ohne Karte oder Knopf`); idle = -1e9; }
       await page.clock.runFor(100);
     }
   };
@@ -87,7 +104,7 @@ for (const run of RUNS) {
     const file = `${dir}/${String(++n).padStart(2, '0')}-${step}.png`;
     await page.screenshot({ path: file, animations: 'disabled' });
     shots++;
-    for (const f of await check(page)) { findings++; console.log(`WARN ${file}: ${f}`); }
+    for (const f of await check(page, run.lang)) warn(`${file}: ${f}`);
   };
 
   await page.goto(url);
@@ -109,8 +126,52 @@ for (const run of RUNS) {
   await page.click('#go');
   await snap('done');
   await page.click('#go');
-  await snap('her'); // "Noch mal" starts the conversation again
-  await page.close();
+  await snap('her'); // "Noch mal" starts the conversation again, with a new seed
+  await context.close();
+}
+
+// ?reset=1: the stored language is forgotten, the browser language decides, the parameter is gone.
+mkdirSync('shots/reset', { recursive: true });
+for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
+  const { context, page } = await phone(`reset-${lang}`, { locale: LANGS[lang].locale });
+  await page.goto(url);
+  await page.click(`[data-lang="${other}"]`); // stores the other language
+  await page.reload();
+  if (await page.locator('html').getAttribute('lang') !== other) warn(`reset-${lang}: Umschalter auf ${other} nicht gespeichert`);
+  await page.goto(`${url}&reset=1`);
+  await page.waitForURL(u => !u.search.includes('reset'));
+  await page.waitForSelector('#app[data-step="start"]');
+  const file = `shots/reset/${LANGS[lang].locale}-start.png`;
+  await page.screenshot({ path: file });
+  shots++;
+  const title = await page.textContent('.title');
+  if (title !== LANGS[lang].title) warn(`${file}: Titel "${title}" statt "${LANGS[lang].title}"`);
+  for (const f of await check(page, lang)) warn(`${file}: ${f}`);
+  await context.close();
+}
+
+// Offline: one visit online, then no network, reload, play C-E to the end (real timers).
+mkdirSync('shots/offline', { recursive: true });
+{
+  const { context, page } = await phone('offline');
+  await page.goto(url);
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+  await context.setOffline(true);
+  await page.reload();
+  await page.waitForSelector('#app[data-step="start"]');
+  await page.screenshot({ path: 'shots/offline/01-start.png' });
+  await page.click('#go');
+  for (const id of PATHS['C-E']) await page.click(`.say[data-id="${id}"]`);
+  await page.waitForSelector('#app[data-step="over"]');
+  for (let i = 0; i < 3; i++) await page.click('#go');
+  await page.waitForSelector('#app[data-step="review-3"]');
+  await page.screenshot({ path: 'shots/offline/02-review-3.png' });
+  shots += 2;
+  const online = await page.evaluate(() => navigator.onLine);
+  if (online) warn('offline: Seite meldet navigator.onLine = true');
+  console.log(`offline: Neu laden ohne Netz und Pfad C-E bis zum Rueckblick gespielt (navigator.onLine = ${online})`);
+  await context.close();
 }
 
 await browser.close();
