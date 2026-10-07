@@ -7,6 +7,10 @@
 // no stretch longer than 1 s without a card or button (timers run on Playwright's fake clock), console errors.
 // Extra runs: ?reset=1 with locale en-US and de-DE shows the start screen in that language, forgets the end of day 1 (day 2 then starts with the plain sentence);
 // offline: after one visit the page reloads without network and the game plays (service worker).
+// Help page (M4): every country (?land=xx&hilfe=1) in DE and EN, 390x844 light and dark, 360x640; entries, tel: and web links,
+// switch to the international list and back, "Back" to the start. Ways back from the start, the review, day 2 and the end
+// inside the played runs (the screen must be the same as before). Country from browser language / time zone. Offline: help page too.
+// On the help page digits are allowed only in numbers, links, hours and the date; blocked words in all but numbers, names, links.
 // Run: npm run shots [-- <dir>] (builds first). Output: <dir>/<lang>/<path>/NN-<step>.png, <dir>/reset/, <dir>/offline/
 // (<dir> defaults to shots)
 import { chromium } from 'playwright';
@@ -31,6 +35,10 @@ const PATHS2 = {
   'B-D':    { picks: ['B', 'D'],       echo: [null, null], faces: ['tense', 'tenseAway'], end: 'D' },
 };
 const BIG = { width: 390, height: 844 }, SMALL = { width: 360, height: 640 }, MID = { width: 375, height: 667 };
+const HELP = json('help.json');
+const LANDS = Object.keys(HELP);
+// runs that open the help page at these screens and come back
+const HELP_AT = { 'C-E': ['start', 'review-2'], '360-C-E': ['start', 'review-2'], 'tag2-B-D': ['day2', 'review-3', 'done'] };
 const RUNS = Object.keys(LANGS).flatMap(lang => [
   ...Object.entries(PATHS).map(([name, picks]) => ({ lang, name, picks, viewport: BIG })),
   { lang, name: 'dunkel-C-E', picks: PATHS['C-E'], viewport: BIG, dark: true },
@@ -47,7 +55,8 @@ function check(page, lang) {
   return page.evaluate(({ BLOCK, CLOCK, LANG }) => {
     const out = [];
     const W = innerWidth, H = innerHeight;
-    document.querySelectorAll('.caption, .her, .you, .say, .over, .log p, .rv p, .title, .tagline, .help, .day, .echo').forEach(el => {
+    const help = document.getElementById('app').dataset.step === 'help';
+    document.querySelectorAll('.caption, .her, .you, .say, .over, .log p, .rv p, .title, .tagline, .help-link, .day, .echo, .safe, .hname, .hours, .hland, .hchecked, .switch').forEach(el => {
       const cs = getComputedStyle(el);
       const h = el.getBoundingClientRect().height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
         - parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
@@ -56,16 +65,19 @@ function check(page, lang) {
       // the lage of day 2 (131 characters, verbatim from the script) needs 4 lines at 17 px; accepted, see bericht M3
       if (lines > (el.id === 'lage' && el.textContent.length > 120 ? 4 : 3)) out.push(`${lines} Zeilen: ${label}`);
       if (el.scrollWidth > el.clientWidth + 1) out.push(`abgeschnitten: ${label}`);
-      if (parseFloat(cs.fontSize) < 17 && !el.classList.contains('help')) out.push(`Schrift ${cs.fontSize}: ${label}`);
+      if (parseFloat(cs.fontSize) < 17) out.push(`Schrift ${cs.fontSize}: ${label}`);
     });
-    document.querySelectorAll('button').forEach(b => {
+    document.querySelectorAll('button, .helpview a').forEach(b => {
       const r = b.getBoundingClientRect();
       const min = b.closest('.lang') ? 48 : 44; // language switch: 48 px as in STIL.md
       if (r.width && (r.width < min || r.height < min)) out.push(`Tippziel ${Math.round(r.width)}x${Math.round(r.height)}: ${b.textContent.trim().slice(0, 30)}`);
     });
     const de = document.documentElement;
     if (de.scrollWidth > W) out.push(`ragt seitlich raus: ${de.scrollWidth} > ${W}`);
-    if (H >= 800 && de.scrollHeight > H) out.push(`ragt unten raus: ${de.scrollHeight} > ${H}`);
+    // the help hint below the last button of the review may need scrolling (bericht M4); everything above it has to fit
+    const foot = document.querySelector('#app > .help');
+    const footH = foot && document.getElementById('app').dataset.step.startsWith('review') ? foot.offsetHeight : 0;
+    if (H >= 800 && !help && de.scrollHeight - footH > H) out.push(`ragt unten raus: ${de.scrollHeight - footH} > ${H}`);
     // what the player must reach has to be on screen without scrolling by hand
     const last = [...document.querySelectorAll('.rv')].pop();
     [...document.querySelectorAll('.say, #go'), ...(last ? [last] : [])].forEach(el => {
@@ -74,8 +86,15 @@ function check(page, lang) {
       if (r.top < 0 || r.bottom > H + 0.5) out.push(`ausserhalb des Bildes (${Math.round(r.top)}..${Math.round(r.bottom)} bei ${H}): ${el.textContent.trim().slice(0, 30)}`);
     });
     const text = document.body.innerText + ' ' + [...document.querySelectorAll('[aria-label]')].map(e => e.getAttribute('aria-label')).join(' ');
-    BLOCK.forEach(w => { if (text.toLowerCase().includes(w.toLowerCase())) out.push(`Sperrwort "${w}"`); });
-    const digits = text.split(CLOCK).join('').match(/\d+/g);
+    // help page, the only exceptions: numbers, names of the services and links may hold blocked words;
+    // digits only in numbers, links, hours and the date of the check
+    // longest first, so "110" does not cut a piece out of "0800 1110111"
+    const minus = sel => [...document.querySelectorAll(sel)].map(el => el.innerText).sort((x, y) => y.length - x.length)
+      .reduce((s, part) => s.split(part).join(' '), text);
+    const blockText = help ? minus('.helpview .tel, .helpview .hname, .helpview .web') : text;
+    const digitText = help ? minus('.helpview .tel, .helpview .web, .helpview .hours, .helpview .hchecked') : text;
+    BLOCK.forEach(w => { if (blockText.toLowerCase().includes(w.toLowerCase())) out.push(`Sperrwort "${w}"`); });
+    const digits = digitText.split(CLOCK).join('').match(/\d+/g);
     if (digits) out.push(`Zahl ${digits.join(',')}`);
     if (de.lang !== LANG) out.push(`html lang ${de.lang} statt ${LANG}`);
     return out;
@@ -98,6 +117,44 @@ async function phone(name, { viewport = BIG, locale = 'de-DE', dark = false } = 
   page.on('console', m => { if (m.type() === 'error') { errors++; console.log(`FEHLER ${name} console: ${m.text()}`); } });
   page.on('pageerror', e => { errors++; console.log(`FEHLER ${name} page: ${e.message}`); });
   return { context, page };
+}
+
+// Help page: shown country, every entry of content/help.json with name in the language, tel: links, web link in a new tab,
+// hours, the country line, the switch, the date line.
+async function checkHelp(page, lang, shown, detected) {
+  const out = [];
+  const T = LANGS[lang].t1;
+  const st = await page.evaluate(() => ({
+    step: document.getElementById('app').dataset.step, land: document.getElementById('app').dataset.land,
+    safe: document.querySelector('.safe')?.textContent, hland: document.querySelector('.hland')?.textContent,
+    checked: document.querySelector('.hchecked')?.textContent, toggle: document.querySelector('.switch')?.textContent ?? null,
+    items: [...document.querySelectorAll('.hlist li')].map(li => ({
+      name: li.querySelector('.hname').textContent, tels: [...li.querySelectorAll('.tel')].map(a => a.getAttribute('href')),
+      href: li.querySelector('.web').getAttribute('href'), target: li.querySelector('.web').target, rel: li.querySelector('.web').rel,
+      hours: li.querySelector('.hours').textContent, hoursLang: li.querySelector('.hours').lang,
+    })),
+  }));
+  if (st.step !== 'help') out.push(`Schritt ${st.step} statt help`);
+  if (st.land !== shown) out.push(`Land ${st.land} statt ${shown}`);
+  if (st.safe !== T['ui.helpSafe']) out.push(`Sicherheitssatz "${st.safe}"`);
+  if (st.hland !== `${T['ui.helpLand']} ${T[`ui.land.${shown}`]}`) out.push(`Landzeile "${st.hland}"`);
+  const year = HELP[shown][0].checked.slice(0, 4);
+  if (!st.checked?.startsWith(T['ui.helpChecked']) || !st.checked.includes(year)) out.push(`Datumszeile "${st.checked}"`);
+  const toggle = detected === 'intl' ? null : T[`ui.land.${shown === 'intl' ? detected : 'intl'}`];
+  if (st.toggle !== toggle) out.push(`Umschalter "${st.toggle}" statt "${toggle}"`);
+  if (st.items.length !== HELP[shown].length) out.push(`${st.items.length} Eintraege statt ${HELP[shown].length}`);
+  HELP[shown].forEach((e, i) => {
+    const it = st.items[i];
+    if (!it) return;
+    const name = lang === 'de' ? e.name_de : e.name_en;
+    const tels = e.number.split(' / ').map(n => n.replace(/\D/g, '')).filter(n => n).map(n => `tel:${n}`);
+    if (it.name !== name) out.push(`Name "${it.name}" statt "${name}"`);
+    if (it.tels.join() !== tels.join()) out.push(`${name}: tel ${it.tels.join()} statt ${tels.join()}`);
+    if (it.href !== e.url || it.target !== '_blank' || !it.rel.includes('noopener')) out.push(`${name}: Link ${it.href} ${it.target} ${it.rel}`);
+    if (it.hours !== e.hours) out.push(`${name}: Zeiten "${it.hours}"`);
+    if (it.hoursLang !== (lang === 'de' ? '' : 'de')) out.push(`${name}: Zeiten lang="${it.hoursLang}"`);
+  });
+  return out;
 }
 
 // Day 2: what the stage must show at this step of the test path.
@@ -166,6 +223,24 @@ for (const run of RUNS) {
     shots++;
     for (const f of await check(page, run.lang)) warn(`${file}: ${f}`);
     if (run.day === 2 && !again && /^(her|hand|you|face|over|review)/.test(step)) for (const f of await checkDay2(page, run, step)) warn(`${file}: ${f}`);
+    if (HELP_AT[run.name]?.includes(step) && !again) await helpAndBack(step);
+  };
+  // Open the help page from this screen and come back: the screen must be exactly as before.
+  const helpAndBack = async step => {
+    const before = await page.innerHTML('#app');
+    await page.click('[data-help]');
+    await page.waitForSelector('#app[data-step="help"]');
+    const file = `${dir}/${String(++n).padStart(2, '0')}-hilfe-von-${step}.png`;
+    await page.screenshot({ path: file, fullPage: true, animations: 'disabled' });
+    shots++;
+    const detected = run.lang === 'de' ? 'de' : 'us'; // locale de-DE / en-US
+    for (const f of [...await check(page, run.lang), ...await checkHelp(page, run.lang, detected, detected)]) warn(`${file}: ${f}`);
+    await page.click('#back');
+    await page.waitForSelector(`#app[data-step="${step}"]`);
+    const after = await page.innerHTML('#app');
+    if (after !== before) warn(`${file}: nach Zurueck ist ${step} nicht wie vorher`);
+    const focus = await page.evaluate(() => document.activeElement?.hasAttribute('data-help'));
+    if (!focus) warn(`${file}: Fokus nach Zurueck nicht auf dem Hilfe-Link`);
   };
   const L = LANGS[run.lang];
   const day2Line = async want => {
@@ -216,6 +291,47 @@ for (const run of RUNS) {
   await context.close();
 }
 
+// Help page for every country, in both languages, 390x844 light and dark and 360x640; switch to the international list and back; "Back" to the start.
+for (const land of LANDS) for (const lang of Object.keys(LANGS)) for (const [vp, dark] of [[BIG, false], [BIG, true], [SMALL, false]]) {
+  const name = `${land}-${vp.width}${dark ? '-dunkel' : ''}`;
+  const dir = `${OUT}/hilfe/${lang}`;
+  mkdirSync(dir, { recursive: true });
+  const { context, page } = await phone(`hilfe/${lang}/${name}`, { viewport: vp, locale: LANGS[lang].locale, dark });
+  await page.goto(`${url}&land=${land}&hilfe=1`);
+  await page.waitForSelector('#app[data-step="help"]');
+  const look = async (file, shown) => {
+    await page.screenshot({ path: file, fullPage: true, animations: 'disabled' });
+    shots++;
+    for (const f of [...await check(page, lang), ...await checkHelp(page, lang, shown, land)]) warn(`${file}: ${f}`);
+  };
+  await look(`${dir}/${name}.png`, land);
+  if (land !== 'intl') {
+    await page.click('.switch');
+    await look(`${dir}/${name}-weitere.png`, 'intl');
+    await page.click('.switch');
+    await look(`${dir}/${name}-zurueck.png`, land);
+  }
+  await page.click('#back');
+  await page.waitForSelector('#app[data-step="start"]');
+  if (await page.textContent('.title') !== LANGS[lang].t1['ui.title']) warn(`${dir}/${name}: Zurueck fuehrt nicht zum Start`);
+  if (await page.$('.helpview')) warn(`${dir}/${name}: Hilfeseite nach Zurueck noch da`);
+  await context.close();
+}
+
+// Country from the browser: region of the first language, else the time zone (no ?land=).
+for (const [locale, timezoneId, want] of [['de-AT', 'Europe/Berlin', 'at'], ['en-GB', 'Europe/Berlin', 'gb'], ['fr-CH', 'Europe/Berlin', 'ch'],
+  ['en-IE', 'Europe/Berlin', 'ie'], ['de-DE', 'America/Chicago', 'de'], ['de', 'Europe/Zurich', 'ch'], ['en', 'America/Chicago', 'us'],
+  ['fr-FR', 'Europe/Berlin', 'intl'], ['de', 'Asia/Tokyo', 'intl']]) {
+  const context = await browser.newContext({ locale, timezoneId });
+  const page = await context.newPage();
+  await page.goto(`${url}&hilfe=1`);
+  await page.waitForSelector('#app[data-step="help"]');
+  const got = await page.getAttribute('#app', 'data-land');
+  if (got !== want) warn(`Land bei ${locale} / ${timezoneId}: ${got} statt ${want}`);
+  await context.close();
+}
+console.log('Land aus Browsersprache und Zeitzone: 9 Faelle geprueft');
+
 // ?reset=1: the stored language is forgotten, the browser language decides, the parameter is gone.
 mkdirSync(`${OUT}/reset`, { recursive: true });
 for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
@@ -261,18 +377,26 @@ mkdirSync(`${OUT}/offline`, { recursive: true });
   await page.reload();
   await page.waitForSelector('#app[data-step="start"]');
   await page.screenshot({ path: `${OUT}/offline/01-start.png` });
+  // the help page works offline too (help.json is in the cached bundle)
+  await page.click('[data-help]');
+  await page.waitForSelector('#app[data-step="help"]');
+  await page.screenshot({ path: `${OUT}/offline/02-hilfe.png`, fullPage: true });
+  shots++;
+  for (const f of [...await check(page, 'de'), ...await checkHelp(page, 'de', 'de', 'de')]) warn(`${OUT}/offline/02-hilfe.png: ${f}`);
+  await page.click('#back');
+  await page.waitForSelector('#app[data-step="start"]');
   await page.click('#go');
   for (const id of PATHS['C-E']) await page.click(`.say[data-id="${id}"]`);
   await page.waitForSelector('#app[data-step="over"]');
   for (let i = 0; i < 3; i++) await page.click('#go');
   await page.waitForSelector('#app[data-step="review-3"]');
   await page.waitForTimeout(600); // let the last line finish fading in
-  await page.screenshot({ path: `${OUT}/offline/02-review-3.png`, animations: 'disabled' });
+  await page.screenshot({ path: `${OUT}/offline/03-review-3.png`, animations: 'disabled' });
   shots += 2;
-  for (const f of await check(page, 'de')) warn(`${OUT}/offline/02-review-3.png: ${f}`);
+  for (const f of await check(page, 'de')) warn(`${OUT}/offline/03-review-3.png: ${f}`);
   const online = await page.evaluate(() => navigator.onLine);
   if (online) warn('offline: Seite meldet navigator.onLine = true');
-  console.log(`offline: Neu laden ohne Netz und Pfad C-E bis zum Rueckblick gespielt (navigator.onLine = ${online})`);
+  console.log(`offline: Neu laden ohne Netz, Hilfeseite, Pfad C-E bis zum Rueckblick gespielt (navigator.onLine = ${online})`);
   await context.close();
 }
 
