@@ -1,4 +1,4 @@
-// Day 1 as a pure state machine: no DOM, no text. Text lives in content/<lang>/.
+// One day's conversation as a pure state machine: no DOM, no text. Text lives in content/<lang>/.
 import { FACES, type FaceName, type FaceParams } from './faces';
 import { mulberry32, shuffle } from './rng';
 
@@ -9,10 +9,13 @@ export interface Outcome {
   next?: number;      // index of the next turn
   end?: string;       // ending id (key into review.cost)
   note?: string;      // stage direction shown before the end (text id)
+  echo?: string;      // this sentence stays hanging in the room (text id of the echo)
+  unecho?: boolean;   // takes the standing echo back
 }
 
 export interface Scene {
-  who: string;
+  who: 'brandt' | 'jule';
+  frame?: 'chat';     // day 2 is a chat; day 1 has no frame field
   lage: string;
   opening: { line: string; face: FaceName };
   turns: string[][];
@@ -29,6 +32,7 @@ export interface GameState {
   log: LogEntry[];
   line: string;       // her current line (text id)
   face: FaceName;
+  echo?: string;      // the one echo standing in the room, if any
   end?: string;
   note?: string;
 }
@@ -38,6 +42,7 @@ export interface Review {
   log: LogEntry[];
   inner: string;
   cost: string;
+  echo?: string;
 }
 
 export function newGame(scene: Scene, seed: number): GameState {
@@ -67,6 +72,8 @@ export function choose(scene: Scene, state: GameState, option: string): GameStat
     log: [...state.log, { who: 'you', text: option }, { who: 'her', text: outcome.reply }],
     line: outcome.reply,
     face: outcome.face,
+    // An echo stays until it is taken back or the conversation ends; a new one replaces it (never more than one).
+    echo: outcome.unecho ? undefined : outcome.echo ?? state.echo,
     end: outcome.end,
     note: outcome.note,
   };
@@ -79,5 +86,6 @@ export function review(scene: Scene, state: GameState): Review {
     log: [{ who: 'her', text: scene.opening.line }, ...state.log], // her opening demand comes first
     inner: scene.review.inner,
     cost: scene.review.cost[state.end],
+    echo: state.echo,
   };
 }

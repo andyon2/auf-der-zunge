@@ -1,0 +1,42 @@
+{
+  "who": "jule",
+  "frame": "chat",
+  "lage": "lage",
+  "opening": { "line": "jule.open", "face": "tense" },
+  "turns": [
+    ["A", "B", "C"],
+    ["D", "E", "F"],
+    ["R1", "D", "E"],
+    ["G", "H", "I"],
+    ["R2", "H", "I"]
+  ],
+  "options": {
+    "A": [{ "reply": "A.reply", "face": "closed", "echo": "echo.A", "next": 2 }],
+    "B": [{ "reply": "B.reply", "face": "tense", "next": 1 }],
+    "C": [{ "reply": "C.reply", "face": "opening", "next": 1 }],
+    "D": [{ "reply": "D.reply", "face": "tenseAway", "end": "D" }],
+    "E": [
+      { "after": "A", "reply": "E.reply.afterA", "face": "hard", "next": 3 },
+      { "after": "C", "reply": "E.reply.afterC", "face": "yielding", "next": 3 },
+      { "reply": "E.reply", "face": "tense", "next": 3 }
+    ],
+    "F": [{ "reply": "F.reply", "face": "closed", "echo": "echo.F", "next": 4 }],
+    "R1": [{ "reply": "R1.reply", "face": "tense", "unecho": true, "next": 3 }],
+    "R2": [{ "reply": "R2.reply", "face": "tense", "unecho": true, "end": "R2" }],
+    "G": [{ "reply": "G.reply", "face": "closed", "end": "G" }],
+    "H": [
+      { "after": "F", "reply": "H.reply.afterF", "face": "tenseAway", "end": "H" },
+      { "reply": "H.reply", "face": "tenseAway", "end": "H" }
+    ],
+    "I": [
+      { "after": "R1", "reply": "I.reply.warm", "face": "opening", "end": "I" },
+      { "after": "A", "reply": "I.reply.cool", "face": "tense", "end": "I" },
+      { "after": "F", "reply": "I.reply.cool", "face": "tense", "end": "I" },
+      { "reply": "I.reply.warm", "face": "opening", "end": "I" }
+    ]
+  },
+  "review": {
+    "inner": "inner",
+    "cost": { "D": "cost.D", "G": "cost.G", "H": "cost.H", "I": "cost.I", "R2": "cost.R2" }
+  }
+}

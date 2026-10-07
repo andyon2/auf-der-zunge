@@ -1,0 +1,53 @@
+{
+  "lage": "Jule, deine Freundin, seit Tom weg ist allein mit Leo. Donnerstagabend. Sonntagvormittag willst du deinem Bruder beim Umzug helfen.",
+  "jule.open": "kannst du sonntag leo nehmen? den ganzen tag. muss mal raus",
+
+  "A": "Du weißt doch, dass mein Bruder Sonntag umzieht.",
+  "A.reply": "stimmt. vergessen. sorry, dass ich gefragt hab.",
+  "B": "Den ganzen Tag? Was hast du denn vor?",
+  "B.reply": "nichts. einfach mal nichts. geht das oder nicht?",
+  "C": "Ist dir gerade alles zu viel geworden?",
+  "C.reply": "…ja. seit wochen mach ich alles allein. ich kann nicht mehr.",
+
+  "D": "Na gut. Dann sag ich meinem Bruder halt ab.",
+  "D.reply": "echt? … danke. sorry.",
+  "E": "Vormittag bin ich beim Umzug. Ab zwei nehm ich Leo.",
+  "E.reply.afterA": "ab zwei. ok. aber den vormittag schaff ich nicht.",
+  "E.reply.afterC": "ab zwei wär schon viel. nur den vormittag schaff ich nicht.",
+  "E.reply": "ab zwei geht. aber den vormittag schaff ich nicht.",
+  "F": "Frag doch mal Tom. Der ist auch sein Vater.",
+  "F.reply": "tom geht nicht mal ans telefon.",
+  "R1": "Sorry, das war spitz. Ab zwei könnte ich Leo nehmen.",
+  "R1.reply": "schon gut. ab zwei geht. aber den vormittag schaff ich nicht.",
+
+  "G": "Den Vormittag schaffst du doch auch noch.",
+  "G.reply": "klar. schaff ich schon. bring ihn um zwei.",
+  "H": "Okay, vergiss es. Ich nehm ihn den ganzen Tag.",
+  "H.reply": "danke. echt. sorry wegen deinem bruder.",
+  "H.reply.afterF": "…ok. danke.",
+  "I": "Leo kann mit zum Umzug. Danach bleibt er bei mir.",
+  "I.reply.warm": "…zum umzug? der wird ausflippen. danke. echt.",
+  "I.reply.cool": "zum umzug. ok. danke.",
+  "R2": "Sorry, das mit Tom war blöd. Ab zwei nehm ich Leo.",
+  "R2.reply": "schon gut. ab zwei hilft. den vormittag krieg ich hin.",
+
+  "echo.A": "„Du weißt doch …“",
+  "echo.A.brick": "weißt doch",
+  "echo.F": "„Frag doch mal Tom.“",
+  "echo.F.brick": "Tom",
+
+  "inner": "Gestern hab ich Leo angeschrien, wegen einer Socke. So will ich nicht sein.",
+  "cost.D": "Du sagst deinem Bruder ab und hast Leo den ganzen Sonntag.",
+  "cost.H": "Du sagst deinem Bruder ab und hast Leo den ganzen Sonntag.",
+  "cost.I": "Du passt den ganzen Sonntag auf Leo auf, auch beim Umzug.",
+  "cost.G": "Du hast Leo ab zwei, und sie fragt dich nicht so bald wieder.",
+  "cost.R2": "Du nimmst Leo ab zwei, direkt nach dem Umzug.",
+
+  "ui.day2": "Tag zwei. Jule hat geschrieben.",
+  "ui.day2.kessler": "Tag zwei. Kessler hat sein Angebot, und Jule hat geschrieben.",
+  "ui.chatHint": "Hier siehst du, was du im Chat nie siehst.",
+  "ui.echoHint": "Manches, was du sagst, bleibt im Raum hängen. Oben steht, was.",
+  "ui.write": "Was schreibst du?",
+  "ui.stage": "Jule mit dem Handy",
+  "ui.face": "Jule"
+}

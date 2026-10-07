@@ -1,0 +1,53 @@
+{
+  "lage": "Jule, your friend, on her own with Leo since Tom left. Thursday evening. On Sunday morning you want to help your brother move.",
+  "jule.open": "can you take leo on sunday? the whole day. i have to get out",
+
+  "A": "You know full well my brother's moving on Sunday.",
+  "A.reply": "right. forgot. sorry i asked.",
+  "B": "The whole day? What are you planning to do?",
+  "B.reply": "nothing. just nothing for once. can you or not?",
+  "C": "Is it all getting too much for you right now?",
+  "C.reply": "…yeah. i've been doing everything alone for weeks. i can't anymore.",
+
+  "D": "Fine. I'll cancel on my brother, then.",
+  "D.reply": "really? … thanks. sorry.",
+  "E": "I'm at the move in the morning. I'll take Leo from two.",
+  "E.reply.afterA": "from two. ok. but i can't manage the morning.",
+  "E.reply.afterC": "from two would be a lot. it's just the morning i can't manage.",
+  "E.reply": "from two works. but i can't manage the morning.",
+  "F": "Why not ask Tom? He's Leo's dad too.",
+  "F.reply": "tom doesn't even pick up the phone.",
+  "R1": "Sorry, that was snippy. I could take Leo from two.",
+  "R1.reply": "it's fine. from two works. but i can't manage the morning.",
+
+  "G": "Surely you can manage the morning too.",
+  "G.reply": "sure. i'll manage. bring him at two.",
+  "H": "Okay, forget it. I'll take him the whole day.",
+  "H.reply": "thank you. really. sorry about your brother.",
+  "H.reply.afterF": "…ok. thanks.",
+  "I": "Leo can come along to the move. Then he stays with me.",
+  "I.reply.warm": "…to the move? he'll go wild. thank you. really.",
+  "I.reply.cool": "to the move. ok. thanks.",
+  "R2": "Sorry, that thing about Tom was dumb. I'll take Leo from two.",
+  "R2.reply": "it's fine. from two helps. i can manage the morning.",
+
+  "echo.A": "“You know full well …”",
+  "echo.A.brick": "know full well",
+  "echo.F": "“Why not ask Tom?”",
+  "echo.F.brick": "Tom",
+
+  "inner": "Yesterday I yelled at Leo over a sock. That's not who I want to be.",
+  "cost.D": "You cancel on your brother and have Leo all Sunday.",
+  "cost.H": "You cancel on your brother and have Leo all Sunday.",
+  "cost.I": "You look after Leo all Sunday, the move included.",
+  "cost.G": "You have Leo from two, and she won't be asking you again soon.",
+  "cost.R2": "You take Leo from two, straight after the move.",
+
+  "ui.day2": "Day two. Jule sent you a message.",
+  "ui.day2.kessler": "Day two. Kessler has his proposal, and Jule sent you a message.",
+  "ui.chatHint": "Here you see what you never see in a chat.",
+  "ui.echoHint": "Some things you say stay hanging in the room. Up top you see which.",
+  "ui.write": "What do you write?",
+  "ui.stage": "Jule with her phone",
+  "ui.face": "Jule"
+}
