@@ -16,7 +16,7 @@ const LANGS = {
   de: { locale: 'de-DE', block: json('blocklist.json'), clock: '16:50', title: json('de/tag1.json')['ui.title'] },
   en: { locale: 'en-US', block: json('blocklist-en.json'), clock: '4:50', title: json('en/tag1.json')['ui.title'] },
 };
-const PATHS = { 'A-E-G': ['A', 'E', 'G'], 'B-D': ['B', 'D'], 'C-E': ['C', 'E'], 'A-F-H': ['A', 'F', 'H'], 'B-F-I': ['B', 'F', 'I'] };
+const PATHS = { 'A-E-G': ['A', 'E', 'G'], 'B-D': ['B', 'D'], 'C-E': ['C', 'E'], 'A-F-G': ['A', 'F', 'G'], 'A-F-H': ['A', 'F', 'H'], 'B-F-I': ['B', 'F', 'I'] };
 const BIG = { width: 390, height: 844 }, SMALL = { width: 360, height: 640 }, MID = { width: 375, height: 667 };
 const RUNS = Object.keys(LANGS).flatMap(lang => [
   ...Object.entries(PATHS).map(([name, picks]) => ({ lang, name, picks, viewport: BIG })),
@@ -42,7 +42,8 @@ function check(page, lang) {
     });
     document.querySelectorAll('button').forEach(b => {
       const r = b.getBoundingClientRect();
-      if (r.width && (r.width < 44 || r.height < 44)) out.push(`Tippziel ${Math.round(r.width)}x${Math.round(r.height)}: ${b.textContent.trim().slice(0, 30)}`);
+      const min = b.closest('.lang') ? 48 : 44; // language switch: 48 px as in STIL.md
+      if (r.width && (r.width < min || r.height < min)) out.push(`Tippziel ${Math.round(r.width)}x${Math.round(r.height)}: ${b.textContent.trim().slice(0, 30)}`);
     });
     const de = document.documentElement;
     if (de.scrollWidth > W) out.push(`ragt seitlich raus: ${de.scrollWidth} > ${W}`);
@@ -146,6 +147,9 @@ for (const [lang, other] of [['en', 'de'], ['de', 'en']]) {
   shots++;
   const title = await page.textContent('.title');
   if (title !== LANGS[lang].title) warn(`${file}: Titel "${title}" statt "${LANGS[lang].title}"`);
+  if (await page.title() !== LANGS[lang].title) warn(`${file}: Seitentitel "${await page.title()}"`);
+  const active = await page.getAttribute('[aria-pressed="true"]', 'data-lang');
+  if (active !== lang) warn(`${file}: Umschalter zeigt ${active} als aktiv`);
   for (const f of await check(page, lang)) warn(`${file}: ${f}`);
   await context.close();
 }
@@ -166,8 +170,10 @@ mkdirSync('shots/offline', { recursive: true });
   await page.waitForSelector('#app[data-step="over"]');
   for (let i = 0; i < 3; i++) await page.click('#go');
   await page.waitForSelector('#app[data-step="review-3"]');
-  await page.screenshot({ path: 'shots/offline/02-review-3.png' });
+  await page.waitForTimeout(600); // let the last line finish fading in
+  await page.screenshot({ path: 'shots/offline/02-review-3.png', animations: 'disabled' });
   shots += 2;
+  for (const f of await check(page, 'de')) warn(`shots/offline/02-review-3.png: ${f}`);
   const online = await page.evaluate(() => navigator.onLine);
   if (online) warn('offline: Seite meldet navigator.onLine = true');
   console.log(`offline: Neu laden ohne Netz und Pfad C-E bis zum Rueckblick gespielt (navigator.onLine = ${online})`);
