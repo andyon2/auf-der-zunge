@@ -186,9 +186,50 @@ Eigener Text, gleicher Ton. Jule schreibt klein, ohne Smileys; Namen Jule, Leo, 
 | R2 | Sorry, that thing about Tom was dumb. I'll take Leo from two. | Review-Vorschlag "that Tom remark" nicht uebernommen: klingt foermlicher, der Satz ist umgangssprachlich. |
 | D, H | ... cancel on my brother ... | bleibt (Synthese M3, Tester 12: idiomatisch). |
 
+## Hilfeseite (M4)
+
+Grundlage: Spielkonzept 8, `arbeit/08-bau/m4/help.json` und `hilfe-quellen.md` (Projekt-Repo), Auftrag M4.
+
+- `content/help.json`: Entwurf uebernommen, Felder unveraendert, keine Nummer geaendert. Gestrichen: intl-Eintrag
+  "116 Nummern (116 123 u.a.)" (schwache Quelle, Empfehlung hilfe-quellen.md). Sonst wortgleich.
+- Land (`src/engine/help.ts`): Region der ersten Browsersprache (DE, AT, CH, GB, US, IE), ohne Region die Zeitzone
+  (Berlin, Wien, Zuerich, London, Dublin, America/* → USA), sonst intl. Eine Region ausserhalb der Liste (fr-FR) ergibt intl,
+  nicht die Zeitzone. `?land=xx` ueberschreibt (nur bekannte Laender).
+- Ansicht: der vorhandene Hinweis `ui.help` ist ein Link-Knopf (17 px, unterstrichen, 44 px hoch, vorher 14 px Text) am Start,
+  am Start Tag 2, am Ende und neu unter dem Weiter-Knopf im Rueckblick. Er oeffnet die Hilfeseite im Spiel: das Spiel wird
+  nur versteckt, "Zurück" setzt dieselben Knoten wieder ein (Zustand, Schritt, Scrollstelle bleiben, Fokus zurueck auf den Link).
+  `?hilfe=1` oeffnet sie direkt.
+- Je Eintrag: Name (`name_de` / `name_en`), jede Nummer als `tel:`-Link (mehrere in `number` mit " / " getrennt, nur Ziffern
+  im Link: "1-800-799-SAFE (7233)" → tel:18007997233), Zeiten (`hours`), Link auf `url` im neuen Tab, Linktext = Domain.
+  Find A Helpline hat keine Nummer, nur den Link.
+- Datum: das aelteste `checked` der angezeigten Eintraege, ausgeschrieben ("7. Oktober 2026" / "7 October 2026").
+- Umschalter: zeigt die Seite das erkannte Land, fuehrt ein Knopf zu "Weitere Länder" (intl) und von dort zurueck. Wurde kein
+  Land erkannt, gibt es keinen Knopf.
+- Rueckblick 390x844: mit dem Hilfe-Link ist der Rueckblick in Schritt 3 bis 69 px hoeher als der Schirm. Der Link steht
+  unter "Weiter" und ist dort per Scrollen erreichbar; shots.js zaehlt fuer "ragt unten raus" im Rueckblick nur, was ueber
+  dem Link steht. Gesicht und Abstaende des Rueckblicks nicht geaendert (Auftrag: nur der Link).
+
+Neue Texte (`content/<sprache>/tag1.json`, gelten fuer beide Tage):
+
+| ID | DE | EN | Grund |
+|---|---|---|---|
+| ui.helpSafe | Bei Angst oder Gewalt schuldest du niemandem Verständnis. Sicherheit geht vor. | Afraid, or facing violence? You owe no one understanding. Safety comes first. | DE Vorgabe (Konzept 8, Auftrag M4). EN sinngemaess, Anfang wie `ui.help` EN. Erste Fassung "If you're afraid or facing violence, you don't owe anyone understanding. Your safety comes first." brauchte vier Zeilen. |
+| ui.helpLand | Land: | Country: | ohne Vorlage |
+| ui.land.* | Deutschland, Österreich, Schweiz, Vereinigtes Königreich, USA, Irland | Germany, Austria, Switzerland, United Kingdom, United States, Ireland | Laendernamen |
+| ui.land.intl | Weitere Länder | Other countries | DE Vorgabe Auftrag |
+| ui.helpChecked | Quellen geprüft am | Sources checked on | DE Vorgabe Auftrag, Datum dahinter |
+| ui.back | Zurück | Back | DE Vorgabe Auftrag |
+
+Regeln auf der Hilfeseite (shots.js, eng begrenzt auf Schritt `help`): Ziffern nur in Nummern, Links, Zeiten und Datumszeile;
+Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft die Sperrliste DE auch fuer alle `hours`.
+
 ## Offen
 
-- Die Hilfe-Fusszeile verlinkt noch nichts. Nummern und Links nach Land brauchen offizielle Quellen (Spielkonzept 8, `content/help.json`).
+- `hours` in `help.json` gibt es nur auf Deutsch; die englische Hilfeseite zeigt sie deutsch (mit `lang="de"`). Braucht ein Feld
+  `hours_en` aus den Quellen; nicht selbst uebersetzt.
+- `hours` schreibt zwei Umlaute als ae/oe ("175+ Laender", "ebenfalls moeglich", "EU-Laendern"); laut Auftrag nicht geaendert.
+- Die Nummern sind nicht angerufen, die Links nicht im Lauf geoeffnet (nur Ziel und neuer Tab geprueft).
+- Hilfeseite nur in Chromium geprueft; `tel:` auf einem echten Telefon ungeprueft. Rueckblick: Hilfe-Link bei 390x844 erst nach Scrollen sichtbar.
 - Gesichtswechsel nur im Bild geprueft, nicht auf einem echten Geraet.
 - Tag 2: Jules Gesichter und das Echo nur im Bild geprueft (Chromium, drei Groessen), nicht auf einem Geraet.
 - Auf 360x640 ist die Buehne nur 140 px hoch, das Gesicht dort klein, der Tisch endet sichtbar vor dem Rand. Geprueft sind 390x844, 360x640, 375x667, nur in Chromium.
