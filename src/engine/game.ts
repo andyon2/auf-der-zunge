@@ -76,7 +76,7 @@ export function review(scene: Scene, state: GameState): Review {
   if (!state.end) throw new Error('conversation not over');
   return {
     face: FACES[state.face],
-    log: state.log,
+    log: [{ who: 'her', text: scene.opening.line }, ...state.log], // her opening demand comes first
     inner: scene.review.inner,
     cost: scene.review.cost[state.end],
   };

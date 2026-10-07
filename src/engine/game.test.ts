@@ -35,7 +35,8 @@ describe('day 1, Frau Brandt', () => {
       for (const id of [r.inner, r.cost, ...r.log.map(e => e.text), ...(state.note ? [state.note] : [])]) {
         expect(text[id], `${path.join('>')}: ${id}`).toBeTruthy();
       }
-      expect(r.log.length).toBe(path.length * 2);
+      expect(r.log.length).toBe(path.length * 2 + 1);
+      expect(r.log[0]).toEqual({ who: 'her', text: scene.opening.line });
       expect(Object.values(r.face).every(v => v !== undefined)).toBe(true);
       expect(JSON.stringify(r)).not.toContain('undefined');
     }
@@ -57,7 +58,7 @@ describe('day 1, Frau Brandt', () => {
     expect(byIds(['A', 'E']).line).toBe('E.reply');
     expect(byIds(['B', 'D']).end).toBe('D');
     expect(byIds(['A', 'F', 'H']).end).toBe('H');
-    expect(byIds(['A', 'E', 'G']).log.map(e => e.text)).toEqual(['A', 'A.reply', 'E', 'E.reply', 'G', 'G.reply.afterE']);
+    expect(review(scene, byIds(['A', 'E', 'G'])).log.map(e => e.text)).toEqual(['brandt.open', 'A', 'A.reply', 'E', 'E.reply', 'G', 'G.reply.afterE']);
   });
 
   it('shuffles hands deterministically per seed', () => {
