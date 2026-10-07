@@ -1,5 +1,5 @@
 {
-  "lage": "Deine Chefin. Freitag, 16:50. Du willst um fünf gehen. Schon oft bist du länger geblieben.",
+  "lage": "Deine Chefin. Freitag, 16:50. Du willst um fünf gehen. Schon oft bist du freitags länger geblieben.",
   "brandt.open": "Das Angebot für Kessler muss Montag früh komplett sein. Machen Sie das heute noch fertig.",
 
   "A": "Heute noch? Wenn Sie so spät planen, ist das nicht mein Problem.",
@@ -11,6 +11,7 @@
 
   "D": "Gut, dann bleib ich halt. Wie immer.",
   "D.reply": "Gut. Bis Montag.",
+  "D.note": "Sie dreht sich zum Bildschirm.",
   "E": "Das Grobe mach ich bis sechs, den Rest Montag bis zehn. Ginge das?",
   "E.reply.afterC": "Eigentlich wollte ich alles Montag früh. …Gut. Den Rest bis zehn, nicht später.",
   "E.reply": "Nein. Montag früh heißt Montag früh.",
@@ -18,6 +19,7 @@
   "F.reply": "Ich brauche keine Therapie. Ich brauche das Angebot.",
 
   "G": "Was genau muss Montag früh fertig sein, damit Kessler zufrieden ist?",
+  "G.reply.afterE": "…Die Preise. Wenn die stimmen, kann der Text bis Montag zehn warten. Dann gehen Sie.",
   "G.reply": "Die Preise. Der Text kann bis Montag zehn warten. Machen Sie die Preise, dann gehen Sie.",
   "H": "Sie können nicht jeden Freitag so kommen.",
   "H.reply": "…Gut. Gehen Sie. Aber das merk ich mir.",

@@ -32,7 +32,7 @@ describe('day 1, Frau Brandt', () => {
       expect(state.end, path.join('>')).toBeDefined();
       const r = review(scene, state);
       endings.add(state.end!);
-      for (const id of [r.inner, r.cost, ...r.log.map(e => e.text)]) {
+      for (const id of [r.inner, r.cost, ...r.log.map(e => e.text), ...(state.note ? [state.note] : [])]) {
         expect(text[id], `${path.join('>')}: ${id}`).toBeTruthy();
       }
       expect(r.log.length).toBe(path.length * 2);
@@ -49,12 +49,15 @@ describe('day 1, Frau Brandt', () => {
       return s;
     };
     expect(byIds(['C', 'E']).end).toBe('E');
-    expect(byIds(['C', 'E']).face).toBe('open');
+    expect(byIds(['C', 'E']).face).toBe('yielding');
+    expect(byIds(['B', 'D']).note).toBe('D.note');
+    expect(byIds(['A', 'E', 'G']).line).toBe('G.reply.afterE');
+    expect(byIds(['A', 'F', 'G']).line).toBe('G.reply');
     expect(byIds(['A', 'E']).end).toBeUndefined();
     expect(byIds(['A', 'E']).line).toBe('E.reply');
     expect(byIds(['B', 'D']).end).toBe('D');
     expect(byIds(['A', 'F', 'H']).end).toBe('H');
-    expect(byIds(['A', 'E', 'G']).log.map(e => e.text)).toEqual(['A', 'A.reply', 'E', 'E.reply', 'G', 'G.reply']);
+    expect(byIds(['A', 'E', 'G']).log.map(e => e.text)).toEqual(['A', 'A.reply', 'E', 'E.reply', 'G', 'G.reply.afterE']);
   });
 
   it('shuffles hands deterministically per seed', () => {

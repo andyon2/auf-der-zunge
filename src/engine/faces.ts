@@ -17,7 +17,7 @@ export interface FaceParams {
   lean: number;      // 0..1 leaning in
 }
 
-export type FaceName = 'tense' | 'closed' | 'opening' | 'open' | 'tenseAway' | 'hard';
+export type FaceName = 'tense' | 'closed' | 'opening' | 'yielding' | 'tenseAway' | 'hard';
 
 export const FACES: Record<FaceName, FaceParams> = {
   // "angespannt"
@@ -26,8 +26,8 @@ export const FACES: Record<FaceName, FaceParams> = {
   closed:    { brow: 1,   lid: 0.55, mouth: -0.6, width: 12, jaw: 1, tilt: 8,  shoulders: 1,   arms: 'crossed', gazeX: 1.5, gazeY: 0.4, lean: 0 },
   // "offener"
   opening:   { brow: -0.6, lid: -0.2, mouth: 0.15, width: 18, jaw: 0, tilt: -5, shoulders: 0,   arms: 'down',    gazeX: 0,   gazeY: 0,   lean: 0.6 },
-  // "offen"
-  open:      { brow: -0.7, lid: -0.3, mouth: 0.5,  width: 20, jaw: 0, tilt: -7, shoulders: 0,   arms: 'down',    gazeX: 0,   gazeY: 0,   lean: 1 },
+  // "offen" after E following C: she gives in. Open brows, neutral mouth, no smile, eyes down (review S1).
+  yielding:  { brow: -0.5, lid: 0.2,  mouth: 0,    width: 16, jaw: 0, tilt: -3, shoulders: 0.1, arms: 'down',    gazeX: 0,   gazeY: 1.4, lean: 0.3 },
   // "angespannt, wendet sich ab"
   tenseAway: { brow: 0.7, lid: 0.45, mouth: -0.4, width: 14, jaw: 1, tilt: 8,  shoulders: 0.6, arms: 'down',    gazeX: -1.5, gazeY: 0.8, lean: 0 },
   // "Gesicht hart"

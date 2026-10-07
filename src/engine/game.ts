@@ -8,6 +8,7 @@ export interface Outcome {
   face: FaceName;
   next?: number;      // index of the next turn
   end?: string;       // ending id (key into review.cost)
+  note?: string;      // stage direction shown before the end (text id)
 }
 
 export interface Scene {
@@ -29,6 +30,7 @@ export interface GameState {
   line: string;       // her current line (text id)
   face: FaceName;
   end?: string;
+  note?: string;
 }
 
 export interface Review {
@@ -66,6 +68,7 @@ export function choose(scene: Scene, state: GameState, option: string): GameStat
     line: outcome.reply,
     face: outcome.face,
     end: outcome.end,
+    note: outcome.note,
   };
 }
 
