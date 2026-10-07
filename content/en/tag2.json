@@ -46,8 +46,8 @@
   "ui.day2": "Day two. Jule sent you a message.",
   "ui.day2.kessler": "Day two. Kessler has his proposal, and Jule sent you a message.",
   "ui.chatHint": "Here you see what you never see in a chat.",
-  "ui.echoHint": "What's up top still hangs in the air.",
-  "ui.echoGone": "Nothing up top any more.",
+  "ui.echoHint": "Your line up top stays hanging in the air.",
+  "ui.echoGone": "Nothing up top anymore.",
   "ui.write": "What do you write back?",
   "ui.stage": "Jule with her phone",
   "ui.face": "Jule"

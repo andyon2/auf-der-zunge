@@ -158,6 +158,13 @@ auch Lage, Echo-Zitate, Innensatz, Kostenzeilen, Start-Saetze, Einmal-Saetze und
   `adz.day1end` loescht und `?tag=2` danach den Standardsatz zeigt, und je Echo-Wechsel den Text von `#echo-say`.
   Gegenprobe: mit absichtlich entfernter Ansage bzw. ohne Loeschen beim Reset meldet shots.js 12 bzw. 4 Befunde.
 
+### Ergaenzung M4: Erklaersatz Echo
+
+- Ein Tester hielt den Satz oben fuer Jules Aussage. Erklaersatz neu: DE "Dein Satz oben bleibt im Raum hängen.",
+  EN "Your line up top stays hanging in the air." (beide Vorgabe Koordinator). Ersetzt den Satz aus 3b.
+- EN einheitlich "anymore": `ui.echoGone` jetzt "Nothing up top anymore." (vorher "any more"), wie in C.reply.
+- shots.js liest beide Saetze aus `content/*/tag2.json`, prueft also ohne Aenderung den neuen Text.
+
 ### Englisch Tag 2
 
 Eigener Text, gleicher Ton. Jule schreibt klein, ohne Smileys; Namen Jule, Leo, Tom bleiben.
@@ -169,7 +176,7 @@ Eigener Text, gleicher Ton. Jule schreibt klein, ohne Smileys; Namen Jule, Leo, 
 | R1 | Sorry, that was snippy. I could take Leo from two. | "sharp" steht auf der Sperrliste. |
 | Kostenzeile G | You have Leo from two, and she won't be asking you again soon. | "any time soon" ginge nicht ("time"). |
 | Start Tag 2 | Day two. Jule sent you a message. / … Kessler has his proposal, and Jule sent you a message. | "has written" klingt nach Brief. |
-| Einmal-Saetze | Here you see what you never see in a chat. / What's up top still hangs in the air. (3b) | kein "echo" (Sperrliste). |
+| Einmal-Saetze | Here you see what you never see in a chat. / Your line up top stays hanging in the air. (M4) | kein "echo" (Sperrliste). |
 | E (3b) | I'm helping with the move till two. Then I'll take Leo. | Review M3: "I'm at the move" unidiomatisch. Vorschlag "I'm helping with the move in the morning. I'll take Leo from two." hat 66 Zeichen (Skript-Marke 61); "till two" sagt dasselbe kuerzer, Jules Antworten "from two" passen weiter. |
 | C.reply (3b) | …yeah. i've been doing everything alone for weeks. i can't do this anymore. | Review M3, Vorschlag uebernommen. |
 | R2.reply (3b) | it's fine. from two helps. i'll get the morning sorted. | Review M3, Vorschlag uebernommen (DE "krieg ich hin"). |
