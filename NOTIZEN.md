@@ -15,6 +15,7 @@ Umlaute und Auslassungspunkte (…) sind im Spiel typografisch gesetzt; das zaeh
 | Innensatz | Wenn Kessler noch mal Fehler findet, bin ich dran. | Mein Chef hat gefragt, ob ich Kessler noch im Griff habe. Ich weiß es selbst nicht. | Pflichtpunkt 3: Der alte Satz wiederholte ihre Antwort nach C. Der neue zeigt Neues: die Angst vor dem eigenen Chef. "Mein Chef" (nicht Chefin) ist eine freie Wahl ohne Vorgabe im Skript (Review K1); es unterscheidet ihn im Lesen von ihr selbst, "Deine Chefin". |
 | Kostenzeile Pfad H (M2) | Du gehst. Der Satz bleibt zwischen euch. | Du gehst. Aber sie hat es sich gemerkt. | Review M2: "Der Satz" war unklar (welcher Satz, deiner oder ihrer?). Die neue Zeile knuepft an ihr "Aber das merk ich mir." an und nennt den Preis direkt. 1 bis 2 Zeilen. EN: "You leave. But she won't forget it." |
 | Kostenzeile Pfad G (M2b) | Heute noch die Preise. | Du bleibst heute noch für die Preise. | Tester 8 (V10 M2): unklar, was wen gekostet hat. Der Satz nennt jetzt dich und den Preis (du bleibst). 1 Zeile bei 390, 1 bei 360. EN: "Staying late today for the prices." |
+| Kostenzeile Pfad E (M3) | Heute bis sechs das Grobe. | Du bleibst heute bis sechs für das Grobe. | Auftrag M3, Nebenpunkt aus M2: gleiche Du-Form wie G und H. EN: "You stay until six for the rough version.", dazu EN G angeglichen: "You stay late today for the prices." (vorher "Staying ..."). |
 | Rueckblick, Kostenzeile | Was es gekostet hat: | Es gibt kein Richtig. Das hat es gekostet: | Pflichtpunkt 5. Wortlaut aus der Synthese, Punkt durch Doppelpunkt ersetzt, weil der Preis darunter folgt. |
 
 ## Neue Texte (nicht im Skript)
@@ -84,7 +85,7 @@ ist erlaubt, gesperrt ist das Nomen "needs" (Beduerfnis).
 | Hilfe-Fusszeile | Afraid, or facing violence? There is help in your country. (M2b) | Review M2 S1, vorher "Fear or violence: there is help in your country". Wie DE ohne Link. |
 | I-Antwort (M2b) | Good for you. I still want the proposal on my desk first thing Monday. | Review M2 M1: "The proposal is still on my desk" klang, als laege es schon dort. |
 | C-Antwort (M2b) | …Yes. He found two mistakes in the last proposal. | Review M2 S1: "the last one" war unklar. |
-| Kostenzeile E (M2b) | Staying until six for the rough version. | Review M2 S1: vorher "The rough version, today until six."; nennt jetzt, was du tust. |
+| Kostenzeile E (M2b, M3) | You stay until six for the rough version. | Review M2 S1: vorher "The rough version, today until six."; M2b "Staying ...", seit M3 Du-Form wie DE. G ebenso: "You stay late today for the prices." |
 | Anfuehrungszeichen | “…” | `:lang(en) q` in style.css; DE bleibt „…“. |
 
 Umschalter (M2b, Tester 7 und Review K4): aktive Sprache dunkel, fett und unterstrichen, die andere gedaempft (--ink-3);
@@ -110,10 +111,57 @@ loescht `activate`. Install laedt mit `cache: 'reload'` am HTTP-Cache vorbei (M2
 sonst konnte ein altes index.html mit alten Asset-Namen im neuen Cache landen). Seiten: erst Netz, offline aus dem Cache; Dateien: erst Cache. `ignoreVary`, weil der Vite-Server
 `Vary: Origin` sendet und Skripte sonst offline nicht aus dem Cache kamen. Im Dev-Server ist kein Service Worker aktiv.
 
+## Tag 2 (M3)
+
+Vorlage: `arbeit/08-bau/m3/skript-tag2.md` (Projekt kommunikation-spiel). Alle deutschen Saetze woertlich aus dem Skript,
+auch Lage, Echo-Zitate, Innensatz, Kostenzeilen, Start-Saetze, Einmal-Saetze und "Was schreibst du?".
+
+- Struktur `content/tag2.json`: fuenf Haende, `after`-Reihenfolge wie "Hinweise fuer den Bau". Antworten, die im Skript
+  wortgleich mehrfach vorkommen, haben eine ID: I nach R1 und nach B/C = `I.reply.warm`, I nach A und nach F = `I.reply.cool`.
+- Engine: `echo` an der Antwort setzt das Echo (Text-ID), `unecho: true` nimmt es weg, sonst bleibt es bis zum Ende.
+  Nie mehr als eins (Feld, keine Liste). Tests in `src/engine/tag2.test.ts`: alle 21 Pfade, fuenf Enden, die Echo-Tabelle des Skripts, die fuenf Testpfade.
+- Texte: Tag 2 nutzt die `ui.*`-Beschriftungen von Tag 1 und ueberschreibt mit `content/<lang>/tag2.json`.
+- Neue Texte ohne Vorlage im Skript (nur fuer Screenreader): `ui.stage` "Jule mit dem Handy" / "Jule with her phone",
+  `ui.face` "Jule" (Bildbeschreibung Rueckblick). Chat-Nachrichten haben ein unsichtbares "Sie:" / "Du:" fuer Screenreader.
+- Figur Jule (`src/ui/figure.ts`): lange dunkle Haare, Hoodie, keine Brille, Farben `--skin-b/--hair-b/--cloth-b` aus STIL.md.
+  Handy in beiden Haenden wie in der Bildfolge. Bei verschraenkten Armen (zu, hart) haelt sie es in der rechten Hand, es ragt
+  ueber die Hand; in der Bildfolge lag es dann mitten auf den Armen (weisses Rechteck ueber dem Arm, im gebauten Bild unlesbar).
+- Buehne Tag 2: Zimmer mit Fenster, kein Tisch, gleiche Hoehe wie Tag 1 (`clamp(140px, 100dvh - 500px, 300px)`), nicht 256 px
+  wie STIL.md fuer die Chat-Szene (dort mit Druck-Hebel, den es nicht gibt).
+- Echo: fester Platz links oben in der Buehne, Zitat in `--ink-3`, Ziegelwort in `--brick` fett, auf einem kleinen Feld in
+  `--paper-2`. Das Feld ist eine Abweichung von STIL.md: ohne Feld liegt das graue Zitat auf Raumfarbe und dunklen Haaren.
+  Es erscheint im Takt des Gesichtswechsels. Am Ende bleibt es stehen, im Rueckblick steht es ueber Jules Gesicht im selben Kasten
+  (nicht darueber gelegt: bei 360 px haette es das Gesicht verdeckt).
+- Einmal-Saetze: "Hier siehst du, was du im Chat nie siehst." steht beim ersten Bild unten in der Buehne (Antwort auf Autorfrage 2,
+  siehe bericht M3), die Lage darunter wie an Tag 1. "Manches, was du sagst …" erscheint beim ersten Echo des Gespraechs unter der
+  Buehne. Beide verschwinden mit der naechsten Antwort, ebenso die Lage.
+- Chat: Jules Nachrichten als Blasen links (`--paper-2`, Rand), deine rechts (`--paper-3`); Karten unveraendert.
+  Takt wie Tag 1. Nur zwei Zeilen sichtbar wie Tag 1.
+- Lage Tag 2 hat 131 Zeichen und braucht bei 17 px vier Zeilen (bei 390, 375 und 360 px). Woertlich aus dem Skript, darum nicht gekuerzt;
+  shots.js laesst fuer `#lage` ueber 120 Zeichen vier Zeilen zu. Entscheidung beim Autor.
+- Ablauf: Rueckblick Tag 1 → "Weiter" → Start Tag 2 (ein Satz, "Weiter", Hilfe-Fusszeile) → Gespraech → Rueckblick → Ende
+  ("Für heute ist das alles.", "Noch mal" startet Tag 1 mit neuem Seed). Das Ende von Tag 1 steht in `adz.day1end`
+  (Buchstabe des Endes); bei E oder G nennt der Start Tag 2 Kessler, fehlt der Wert, der Standardsatz.
+  `?tag=2` startet direkt beim Start Tag 2; `?reset=1` loescht auch `adz.day1end`.
+
+### Englisch Tag 2
+
+Eigener Text, gleicher Ton. Jule schreibt klein, ohne Smileys; Namen Jule, Leo, Tom bleiben.
+
+| Stelle | Wahl | Grund |
+|---|---|---|
+| A / Echo | You know full well my brother's moving on Sunday. / “You know full well …”, Ziegel "know full well" | "du weißt doch" ist ein Vorwurf; "you know full well" traegt ihn, "you know" allein nicht. |
+| F / Echo | Why not ask Tom? He's Leo's dad too. / “Why not ask Tom?”, Ziegel "Tom" | wie DE: der Name ist der Stich. |
+| R1 | Sorry, that was snippy. I could take Leo from two. | "sharp" steht auf der Sperrliste. |
+| Kostenzeile G | You have Leo from two, and she won't be asking you again soon. | "any time soon" ginge nicht ("time"). |
+| Start Tag 2 | Day two. Jule sent you a message. / … Kessler has his proposal, and Jule sent you a message. | "has written" klingt nach Brief. |
+| Einmal-Saetze | Here you see what you never see in a chat. / Some things you say stay hanging in the room. Up top you see which. | nah am Deutschen, kein "echo" (Sperrliste). |
+
 ## Offen
 
 - Die Hilfe-Fusszeile verlinkt noch nichts. Nummern und Links nach Land brauchen offizielle Quellen (Spielkonzept 8, `content/help.json`).
 - Gesichtswechsel nur im Bild geprueft, nicht auf einem echten Geraet.
+- Tag 2: Jules Gesichter und das Echo nur im Bild geprueft (Chromium, drei Groessen), nicht auf einem Geraet.
 - Auf 360x640 ist die Buehne nur 140 px hoch, das Gesicht dort klein, der Tisch endet sichtbar vor dem Rand. Geprueft sind 390x844, 360x640, 375x667, nur in Chromium.
 - Englischer Text ist nicht von einer Muttersprachlerin gegengelesen.
 - Offline nur in Chromium (Playwright) auf localhost geprueft; Safari auf iOS und GitHub Pages ungeprueft.
