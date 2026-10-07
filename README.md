@@ -4,6 +4,8 @@ Ein kleines Spiel, das Kommunikation in Konflikten übt. Dir gegenüber steht ei
 du wählst eine von drei Antworten, sein Gesicht verändert sich, er antwortet. Danach siehst du in Ruhe,
 was du gesagt hast, was er gedacht und nicht gesagt hat und was es dich gekostet hat. Kein Richtig, keine Punkte.
 
+Spielen: https://andyon2.github.io/auf-der-zunge/
+
 Stand: Meilenstein 4, Tag 1 (Frau Brandt, Freitag 16:50) und Tag 2 (Jule im Chat, mit Echo), Hilfeseite nach Land, Deutsch und Englisch, läuft nach einmaligem Laden offline.
 
 ## Befehle
