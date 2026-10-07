@@ -1,10 +1,11 @@
 // Service worker: caches the whole built game so it runs offline after one visit.
+// Install bypasses the HTTP cache (cache: 'reload'), so a fresh build never stores an old index.html.
 // vite.config.ts fills in VERSION (hash of the build) and FILES (every built file) when building.
 const CACHE = 'adz-__VERSION__';
 const FILES = __FILES__;
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES.map(f => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 // Drop caches of older builds.

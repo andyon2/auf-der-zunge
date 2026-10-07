@@ -7,6 +7,7 @@ import en from '../../content/en/tag1.json';
 import { FACES, type FaceName } from '../engine/faces';
 import { choose, hand, newGame, review, type GameState, type Scene } from '../engine/game';
 import { figure } from './figure';
+import { nextRound } from '../engine/rng';
 
 const scene = sceneJson as Scene;
 export type Lang = 'de' | 'en';
@@ -35,14 +36,6 @@ function save(key: string, value: string): void {
   try { localStorage.setItem(key, value); } catch { /* not stored, fine */ }
 }
 
-// Stored choice first, otherwise the browser's first language: de* -> de, anything else -> en.
-export function firstLang(): Lang {
-  const stored = load('adz.lang');
-  if (stored === 'de' || stored === 'en') return stored;
-  const first = navigator.languages?.[0] ?? navigator.language ?? '';
-  return first.toLowerCase().startsWith('de') ? 'de' : 'en';
-}
-
 function setLang(next: Lang): void {
   lang = next;
   document.documentElement.lang = next;
@@ -56,12 +49,11 @@ export function start(root: HTMLElement, daySeed: number, startLang: Lang): void
   showStart();
 }
 
-// "Again" plays a new game: seed of the day plus a counter kept per day in localStorage.
+// "Again" plays a new game; the counter lives in localStorage.
 function nextSeed(): number {
-  const [day, count] = (load('adz.round') ?? '').split(':');
-  const n = Number(day) === baseSeed ? Number(count) + 1 : 1;
-  save('adz.round', `${baseSeed}:${n}`);
-  return baseSeed + n;
+  const round = nextRound(load('adz.round'), baseSeed);
+  save('adz.round', round.stored);
+  return round.seed;
 }
 
 function setStep(step: string): void {
@@ -130,18 +122,20 @@ async function conversation(): Promise<void> {
 
   for (let n = 1; !state.end; n++) {
     const option = await pick(below, hand(state), n);
-    const before = state.line;
     state = choose(scene, state, option);
 
     app.querySelector('#lage')?.remove(); // from the first answer on, the stage and the lines need the room
-    lines.innerHTML = `<p class="her"><q>${t(before)}</q></p>` + youLine(option);
+    // Lines are only appended (aria-live reads just the new one); older ones are dropped so two lines stay visible.
+    while (lines.children.length > 1) lines.firstElementChild!.remove();
+    lines.insertAdjacentHTML('beforeend', youLine(option));
     setStep(`you-${n}`);
     await wait(BEAT.you);
     changeFace(state.face);
     setStep(`face-${n}`);
     await wait(BEAT.face);
     // her answer and the next cards come together
-    lines.innerHTML = `<p class="you">${t('ui.you')} <q>${t(option)}</q></p>` + herLine(state.line);
+    lines.firstElementChild!.remove();
+    lines.insertAdjacentHTML('beforeend', herLine(state.line));
   }
 
   if (state.note) lines.insertAdjacentHTML('beforeend', `<p class="note appear">${t(state.note)}</p>`);
