@@ -1,0 +1,254 @@
+{
+  "who": "mutter",
+  "frame": "phone",
+  "lage": "lage",
+  "opening": {
+    "line": "open",
+    "face": "tense"
+  },
+  "turns": [
+    [
+      "B",
+      "W",
+      "D",
+      "P"
+    ],
+    [
+      "E",
+      "F",
+      "G"
+    ],
+    [
+      "R1",
+      "E",
+      "G"
+    ],
+    [
+      "I",
+      "H",
+      "J"
+    ],
+    [
+      "R2",
+      "H",
+      "J"
+    ]
+  ],
+  "options": {
+    "B": [
+      {
+        "reply": "B.reply",
+        "face": "hard",
+        "next": 2
+      }
+    ],
+    "W": [
+      {
+        "reply": "W.reply",
+        "face": "closed",
+        "next": 1
+      }
+    ],
+    "D": [
+      {
+        "reply": "D.reply",
+        "face": "opening",
+        "next": 1
+      }
+    ],
+    "P": [
+      {
+        "reply": "P.reply",
+        "face": "closed",
+        "next": 1
+      }
+    ],
+    "E": [
+      {
+        "reply": "E.reply",
+        "face": "tense",
+        "next": 3
+      }
+    ],
+    "F": [
+      {
+        "after": "D",
+        "reply": "F.reply.afterD",
+        "face": "opening",
+        "next": 3
+      },
+      {
+        "reply": "F.reply",
+        "face": "yielding",
+        "next": 3
+      }
+    ],
+    "G": [
+      {
+        "reply": "G.reply",
+        "face": "closed",
+        "next": 4
+      }
+    ],
+    "R1": [
+      {
+        "reply": "R1.reply",
+        "face": "tense",
+        "next": 3
+      }
+    ],
+    "I": [
+      {
+        "after": "D",
+        "reply": "I.reply.afterD",
+        "face": "opening",
+        "end": "I.w"
+      },
+      {
+        "after": "F",
+        "reply": "I.reply.afterF",
+        "face": "opening",
+        "end": "I.w"
+      },
+      {
+        "reply": "I.reply",
+        "face": "tense",
+        "end": "I"
+      }
+    ],
+    "H": [
+      {
+        "after": "D",
+        "reply": "H.reply.afterD",
+        "face": "tenseAway",
+        "end": "H.w"
+      },
+      {
+        "after": "F",
+        "reply": "H.reply.afterF",
+        "face": "tenseAway",
+        "end": "H.w"
+      },
+      {
+        "reply": "H.reply",
+        "face": "closed",
+        "end": "H"
+      }
+    ],
+    "J": [
+      {
+        "after": "D",
+        "reply": "J.reply.afterD",
+        "face": "tenseAway",
+        "end": "J.w"
+      },
+      {
+        "after": "F",
+        "reply": "J.reply.afterF",
+        "face": "tenseAway",
+        "end": "J.w"
+      },
+      {
+        "reply": "J.reply",
+        "face": "closed",
+        "end": "J"
+      }
+    ],
+    "R2": [
+      {
+        "after": "D",
+        "reply": "R2.reply.afterD",
+        "face": "yielding",
+        "end": "R2.w"
+      },
+      {
+        "reply": "R2.reply",
+        "face": "tense",
+        "end": "R2"
+      }
+    ]
+  },
+  "review": {
+    "cost": {
+      "I.w": "cost.I.w",
+      "I": "cost.I",
+      "H.w": "cost.H.w",
+      "H": "cost.H",
+      "J.w": "cost.J.w",
+      "J": "cost.J",
+      "R2.w": "cost.R2.w",
+      "R2": "cost.R2"
+    }
+  },
+  "guess": [
+    {
+      "id": "K1",
+      "weight": 6,
+      "text": "guess.K1",
+      "reply": "guess.K1.reply",
+      "face": "opening"
+    },
+    {
+      "id": "K2",
+      "weight": 3,
+      "text": "guess.K2",
+      "reply": "guess.K2.reply",
+      "face": "tense",
+      "alt": "guess.K2.alt"
+    },
+    {
+      "id": "K3",
+      "weight": 1,
+      "text": "guess.K3",
+      "reply": "guess.K3.reply",
+      "face": "yielding",
+      "alt": "guess.K3.alt"
+    },
+    {
+      "id": "K4",
+      "weight": 0,
+      "text": "guess.K4",
+      "reply": "guess.K4.reply",
+      "face": "tense",
+      "alt": "guess.K4.alt"
+    }
+  ],
+  "observe": {
+    "B-R1-I": "obs.1",
+    "B-R1-H": "obs.2",
+    "B-R1-J": "obs.3",
+    "B-E-I": "obs.1",
+    "B-E-H": "obs.2",
+    "B-E-J": "obs.3",
+    "B-G-R2": "obs.4",
+    "B-G-H": "obs.2",
+    "B-G-J": "obs.3",
+    "W-E-I": "obs.1",
+    "W-E-H": "obs.2",
+    "W-E-J": "obs.3",
+    "W-F-I": "obs.5",
+    "W-F-H": "obs.2",
+    "W-F-J": "obs.3",
+    "W-G-R2": "obs.4",
+    "W-G-H": "obs.2",
+    "W-G-J": "obs.3",
+    "D-E-I": "obs.6",
+    "D-E-H": "obs.2",
+    "D-E-J": "obs.3",
+    "D-F-I": "obs.6",
+    "D-F-H": "obs.2",
+    "D-F-J": "obs.3",
+    "D-G-R2": "obs.4",
+    "D-G-H": "obs.2",
+    "D-G-J": "obs.3",
+    "P-E-I": "obs.1",
+    "P-E-H": "obs.2",
+    "P-E-J": "obs.3",
+    "P-F-I": "obs.5",
+    "P-F-H": "obs.2",
+    "P-F-J": "obs.3",
+    "P-G-R2": "obs.4",
+    "P-G-H": "obs.2",
+    "P-G-J": "obs.3"
+  }
+}

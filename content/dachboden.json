@@ -1,0 +1,245 @@
+{
+  "who": "mira",
+  "lage": "lage",
+  "opening": {
+    "line": "open",
+    "face": "tense"
+  },
+  "turns": [
+    [
+      "A",
+      "B",
+      "D",
+      "W"
+    ],
+    [
+      "E",
+      "F",
+      "G"
+    ],
+    [
+      "R1",
+      "E",
+      "G"
+    ],
+    [
+      "H",
+      "I",
+      "J"
+    ],
+    [
+      "R2",
+      "H",
+      "J"
+    ]
+  ],
+  "options": {
+    "A": [
+      {
+        "reply": "A.reply",
+        "face": "closed",
+        "next": 1
+      }
+    ],
+    "B": [
+      {
+        "reply": "B.reply",
+        "face": "hard",
+        "next": 2
+      }
+    ],
+    "D": [
+      {
+        "reply": "D.reply",
+        "face": "opening",
+        "next": 1
+      }
+    ],
+    "W": [
+      {
+        "reply": "W.reply",
+        "face": "tense",
+        "next": 1
+      }
+    ],
+    "E": [
+      {
+        "after": "D",
+        "reply": "E.reply.afterD",
+        "face": "tenseAway",
+        "note": "E.note",
+        "end": "E.w"
+      },
+      {
+        "reply": "E.reply",
+        "face": "hard",
+        "note": "E.note",
+        "end": "E"
+      }
+    ],
+    "F": [
+      {
+        "after": "D",
+        "reply": "F.reply.afterD",
+        "face": "yielding",
+        "next": 3
+      },
+      {
+        "reply": "F.reply",
+        "face": "tense",
+        "next": 3
+      }
+    ],
+    "G": [
+      {
+        "reply": "G.reply",
+        "face": "closed",
+        "next": 4
+      }
+    ],
+    "R1": [
+      {
+        "reply": "R1.reply",
+        "face": "tense",
+        "next": 3
+      }
+    ],
+    "H": [
+      {
+        "after": "D",
+        "reply": "H.reply.afterD",
+        "face": "tenseAway",
+        "end": "H.w"
+      },
+      {
+        "reply": "H.reply",
+        "face": "closed",
+        "end": "H"
+      }
+    ],
+    "I": [
+      {
+        "after": "D",
+        "reply": "I.reply.afterD",
+        "face": "opening",
+        "end": "I.w"
+      },
+      {
+        "reply": "I.reply",
+        "face": "yielding",
+        "end": "I"
+      }
+    ],
+    "J": [
+      {
+        "after": "D",
+        "reply": "J.reply.afterD",
+        "face": "tenseAway",
+        "end": "J.w"
+      },
+      {
+        "reply": "J.reply",
+        "face": "tenseAway",
+        "end": "J"
+      }
+    ],
+    "R2": [
+      {
+        "after": "D",
+        "reply": "R2.reply.afterD",
+        "face": "yielding",
+        "end": "R2.w"
+      },
+      {
+        "reply": "R2.reply",
+        "face": "tense",
+        "end": "R2"
+      }
+    ]
+  },
+  "review": {
+    "cost": {
+      "E.w": "cost.E.w",
+      "E": "cost.E",
+      "H.w": "cost.H.w",
+      "H": "cost.H",
+      "I.w": "cost.I.w",
+      "I": "cost.I",
+      "J.w": "cost.J.w",
+      "J": "cost.J",
+      "R2.w": "cost.R2.w",
+      "R2": "cost.R2"
+    }
+  },
+  "guess": [
+    {
+      "id": "K1",
+      "weight": 6,
+      "text": "guess.K1",
+      "reply": "guess.K1.reply",
+      "face": "opening",
+      "short": "guess.K1.short"
+    },
+    {
+      "id": "K2",
+      "weight": 3,
+      "text": "guess.K2",
+      "reply": "guess.K2.reply",
+      "face": "tense",
+      "alt": "guess.K2.alt",
+      "short": "guess.K2.short"
+    },
+    {
+      "id": "K3",
+      "weight": 1,
+      "text": "guess.K3",
+      "reply": "guess.K3.reply",
+      "face": "yielding",
+      "alt": "guess.K3.alt",
+      "short": "guess.K3.short"
+    },
+    {
+      "id": "K4",
+      "weight": 0,
+      "text": "guess.K4",
+      "reply": "guess.K4.reply",
+      "face": "tense",
+      "alt": "guess.K4.alt",
+      "short": "guess.K4.short"
+    }
+  ],
+  "observe": {
+    "A-E": "obs.1",
+    "A-F-H": "obs.2",
+    "A-F-I": "obs.3",
+    "A-F-J": "obs.4",
+    "A-G-R2": "obs.5",
+    "A-G-H": "obs.2",
+    "A-G-J": "obs.4",
+    "B-R1-H": "obs.2",
+    "B-R1-I": "obs.6",
+    "B-R1-J": "obs.4",
+    "B-E": "obs.1",
+    "B-G-R2": "obs.5",
+    "B-G-H": "obs.2",
+    "B-G-J": "obs.4",
+    "D-E": "obs.1",
+    "D-F-H": "obs.2",
+    "D-F-I": "obs.7",
+    "D-F-J": "obs.4",
+    "D-G-R2": "obs.5",
+    "D-G-H": "obs.2",
+    "D-G-J": "obs.4",
+    "W-E": "obs.1",
+    "W-F-H": "obs.2",
+    "W-F-I": "obs.3",
+    "W-F-J": "obs.4",
+    "W-G-R2": "obs.5",
+    "W-G-H": "obs.2",
+    "W-G-J": "obs.4"
+  },
+  "guessShortAfter": [
+    "E.w",
+    "E"
+  ]
+}
