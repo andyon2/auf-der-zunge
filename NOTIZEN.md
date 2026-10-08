@@ -249,3 +249,10 @@ Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft
 - Zurueck-Geste: ein Verlaufseintrag je Oberflaeche ausser dem Startbild (Gespraech, Rueckblick-Schritte, Tag 2, Ende, Hilfe), gleiche URL. Hilfe und Rueckblick-Schritte folgen der Geste; Gespraech, `review-1`, Tag 2 und Ende holen sie mit `history.go()` zurueck (kein neues `pushState`, das braucht keine Nutzergeste). `#back` ruft `history.back()`.
 - Kein Test fuer `popstate` in `app.test.ts`: die Testumgebung ist `node`, jsdom ist nicht installiert (keine neue Abhaengigkeit dafuer). Abgedeckt ist es durch den Playwright-Durchlauf (Hilfe, Gespraech, Rueckblick, Tag 2, `?hilfe=1`). Die Sprachwahl ist in `app.test.ts` getestet (Inline-Script aus `index.html` mit Stubs ausgefuehrt).
 - Offen: Verhalten nur in Chromium (Desktop-Emulation) geprueft, nicht auf Chrome Android oder iOS Safari mit echter Zurueck-Geste. Nach Reload auf einem Rueckblick-Eintrag zeigt Zurueck frueher gespielte Eintraege als neue Seite (Startbild); gewollt, da kein Spielstand gespeichert wird.
+
+## 2026-10-08 Fall jule (GFK-Befund, Head-Entscheidung nach E21, Andi hat noch nicht abgesegnet)
+
+| Stelle | Alt | Neu | Grund |
+|---|---|---|---|
+| inner (content/de/tag2.json) | Gestern hab ich Leo angeschrien, wegen einer Socke. So will ich nicht sein. | Gestern hab ich Leo angeschrien, wegen einer Socke. So will ich nicht sein. Ich bin einfach leer. Ich brauch mal Ruhe. | Verborgenes: Andi (anders): fall.md nennt als Gefühl „leer, erschrocken über sich“ und als Bedürfnis Ruhe, darunter so mit Leo sein, wie sie sein will; der heutige Satz hat nur den Umstand und ein Selbsturteil. Der Plan (Leo abgeben) bleibt draussen, der Umstand bleibt Auslöser. |
+| R2.reply (content/de/tag2.json) | schon gut. ab zwei hilft. den vormittag krieg ich hin. | schon gut. ab zwei hilft. den vormittag … mal sehen. | Antwort R2.reply: Dasselbe Angebot („Ab zwei nehm ich Leo“) bringt in R1.reply und E.reply „aber den vormittag schaff ich nicht“; nur mit dem zweiten Sorry löst sich ihr Vormittag sofort. Das macht die Entschuldigung zum Hebel auf den besseren Kompromiss. |
