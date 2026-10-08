@@ -1,6 +1,7 @@
 // Screens in the order of the picture sequence (arbeit/06-mockups/bildfolge):
 // start -> lage with her line -> hand -> your line -> her face changes -> her answer with the next hand -> ... -> over -> review
 // Day 1 (Frau Brandt, office) is followed by day 2 (Jule, chat), then "done".
+// Season 1: ?szene=dachboden|samstag|gans plays one scene on its own (German only): conversation, last move, review, "done".
 // #app[data-step] names the current screen, data-face and data-echo what the stage shows; scripts/shots.js reads them.
 import day1Json from '../../content/tag1.json';
 import day2Json from '../../content/tag2.json';
@@ -8,9 +9,15 @@ import de1 from '../../content/de/tag1.json';
 import en1 from '../../content/en/tag1.json';
 import de2 from '../../content/de/tag2.json';
 import en2 from '../../content/en/tag2.json';
+import dachbodenJson from '../../content/dachboden.json';
+import samstagJson from '../../content/samstag.json';
+import gansJson from '../../content/gans.json';
+import deDachboden from '../../content/de/dachboden.json';
+import deSamstag from '../../content/de/samstag.json';
+import deGans from '../../content/de/gans.json';
 import helpJson from '../../content/help.json';
 import { FACES, type FaceName } from '../engine/faces';
-import { choose, hand, newGame, review, type GameState, type Scene } from '../engine/game';
+import { choose, guessHand, hand, newGame, review, takeGuess, type GameState, type Scene } from '../engine/game';
 import { figure } from './figure';
 import { nextRound } from '../engine/rng';
 import { phoneLinks, type Land } from '../engine/help';
@@ -23,9 +30,19 @@ const TEXTS: Record<Lang, Record<Day, Record<string, string>>> = {
   de: { 1: de1, 2: { ...de1, ...de2 } },
   en: { 1: en1, 2: { ...en1, ...en2 } },
 };
+// Season 1 scenes have German texts only; with English chosen they are played in German.
+export type SceneName = 'dachboden' | 'samstag' | 'gans';
+export const SCENE_NAMES: SceneName[] = ['dachboden', 'samstag', 'gans'];
+const STAFFEL: Record<SceneName, { scene: Scene; text: Record<string, string> }> = {
+  dachboden: { scene: dachbodenJson as Scene, text: { ...de1, ...deDachboden } },
+  samstag: { scene: samstagJson as Scene, text: { ...de1, ...deSamstag } },
+  gans: { scene: gansJson as Scene, text: { ...de1, ...deGans } },
+};
 let lang: Lang = 'de';
 let day: Day = 1;
-const scene = () => SCENES[day];
+let szene: SceneName | null = null; // set when a season 1 scene is played (?szene=)
+const scene = () => szene ? STAFFEL[szene].scene : SCENES[day];
+const texts = () => szene ? STAFFEL[szene].text : TEXTS[lang][day];
 const chat = () => scene().frame === 'chat';
 
 // Pauses between the beats of one exchange (ms). No screen without a card or button lasts longer than 1 s.
@@ -36,7 +53,7 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-const t = (id: string) => esc(TEXTS[lang][day][id]);
+const t = (id: string) => esc(texts()[id]);
 
 let app: HTMLElement;
 let baseSeed = 0; // seed of the day, or ?seed=
@@ -58,14 +75,16 @@ function setLang(next: Lang): void {
 }
 
 export function start(root: HTMLElement, daySeed: number, startLang: Lang, startDay: Day = 1,
-  startLand: Land = 'intl', help = false): void {
+  startLand: Land = 'intl', help = false, startScene: SceneName | null = null): void {
   app = root;
   baseSeed = seed = daySeed;
   land = startLand;
-  setLang(startLang);
+  szene = startScene;
+  setLang(szene ? 'de' : startLang); // the scenes fall back to German
   history.replaceState({ i: 0 }, '');
   window.addEventListener('popstate', onPop);
-  if (startDay === 2) showDay2();
+  if (szene) conversation();
+  else if (startDay === 2) showDay2();
   else showStart();
   // Every help hint (start, day 2, review, end) opens the help page inside the game; ?hilfe=1 opens it at once.
   app.addEventListener('click', e => { if ((e.target as Element).closest('[data-help]')) openHelp(); });
@@ -223,7 +242,7 @@ async function conversation(): Promise<void> {
   await wait(BEAT.hand);
 
   for (let n = 1; !state.end; n++) {
-    const option = await pick(below, hand(state), n);
+    const option = await pick(below, hand(state).map(id => ({ id, text: id })), n);
     state = choose(sc, state, option);
 
     app.querySelectorAll('.once').forEach(el => el.remove()); // from the first answer on, the lines need the room
@@ -254,8 +273,9 @@ async function conversation(): Promise<void> {
     lines.insertAdjacentHTML('beforeend', herLine(state.line));
   }
 
-  if (day === 1) save('adz.day1end', state.end);
+  if (!szene && day === 1) save('adz.day1end', state.end);
   if (state.note) lines.insertAdjacentHTML('beforeend', `<p class="note appear">${t(state.note)}</p>`);
+  if (sc.guess) state = await lastMove(sc, state, lines, below);
   lines.insertAdjacentHTML('beforeend', `<p class="over appear">${t('ui.over')}</p>`);
   below.className = 'bottom';
   below.innerHTML = `<button class="go" id="go">${t('ui.next')}</button>`;
@@ -266,10 +286,31 @@ async function conversation(): Promise<void> {
   below.querySelector('#go')!.addEventListener('click', () => showReview(final));
 }
 
-// Show three cards, resolve with the tapped option id.
-function pick(box: HTMLElement, options: string[], n: number): Promise<string> {
+// Season 1, after the end: a stage line, then the four guess cards, then her answer. End and cost stay as they are.
+// The steps go on counting from the last turn (hand-n, you-n, face-n).
+async function lastMove(sc: Scene, state: GameState, lines: HTMLElement, below: HTMLElement): Promise<GameState> {
+  const n = state.chosen.length + 1;
+  lines.insertAdjacentHTML('beforeend', `<p class="note appear" id="last">${t('ui.lastQuestion')}</p>`);
+  await wait(BEAT.hand);
+  const cards = guessHand(sc, state);
+  const id = await pick(below, cards, n);
+  const next = takeGuess(sc, state, id);
+  while (lines.children.length > 1) lines.firstElementChild!.remove(); // the stage line stays above your guess
+  lines.insertAdjacentHTML('beforeend', youLine(cards.find(c => c.id === id)!.text));
+  setStep(`you-${n}`);
+  await wait(BEAT.you);
+  changeFace(next.face);
+  setStep(`face-${n}`);
+  await wait(BEAT.face);
+  lines.firstElementChild!.remove();
+  lines.insertAdjacentHTML('beforeend', herLine(next.line));
+  return next;
+}
+
+// Show the cards (option id and text id), resolve with the tapped id.
+function pick(box: HTMLElement, cards: { id: string; text: string }[], n: number): Promise<string> {
   box.innerHTML = `<h2>${t(chat() ? 'ui.write' : 'ui.ask')}</h2>`
-    + options.map(id => `<button class="say" data-id="${id}">${t(id)}</button>`).join('');
+    + cards.map(c => `<button class="say" data-id="${c.id}">${t(c.text)}</button>`).join('');
   box.hidden = false;
   box.classList.add('appear');
   box.scrollIntoView({ block: 'end' });
@@ -290,9 +331,11 @@ function showReview(state: GameState): void {
   const log = r.log.map(e => e.who === 'you'
     ? `<p class="y">${t('ui.you')} <q>${t(e.text)}</q></p>`
     : `<p>${t('ui.her')} <q>${t(e.text)}</q></p>`).join('');
+  // Season 1 has no inner line (the last move replaces it); the cost step gets the link to the observing sentence.
+  const observe = r.observe ? `<p><button class="help-link" id="obs">${t('ui.observe')}</button></p>` : '';
   const steps = [
-    `<div class="rv appear"><p>${t('ui.inner')}</p><p class="inner"><q>${t(r.inner)}</q></p></div>`,
-    `<div class="rv appear"><p>${t('ui.noRight')}</p><p>${t(r.cost)}</p></div>`,
+    ...(r.inner ? [`<div class="rv appear"><p>${t('ui.inner')}</p><p class="inner"><q>${t(r.inner)}</q></p></div>`] : []),
+    `<div class="rv appear"><p>${t('ui.noRight')}</p><p>${t(r.cost)}</p>${observe}</div>`,
   ];
   // A standing echo stays at its place above her face.
   app.innerHTML = `
@@ -304,6 +347,11 @@ function showReview(state: GameState): void {
     ${helpHint()}`;
   app.dataset.echo = r.echo ?? '';
   const more = app.querySelector<HTMLElement>('#more')!;
+  // the link gives way to the sentence (delegated: the steps are drawn again on back and forward)
+  more.addEventListener('click', e => {
+    const link = (e.target as Element).closest('#obs');
+    if (link) link.parentElement!.outerHTML = `<p class="obs appear">${t(r.observe!)}</p>`;
+  });
   window.scrollTo(0, 0);
   let shown = 0;
   enter('review-1');
@@ -315,7 +363,7 @@ function showReview(state: GameState): void {
     setStep(`review-${n}`);
   };
   app.querySelector('#go')!.addEventListener('click', () => {
-    if (shown === steps.length) return day === 1 ? showDay2() : showDone();
+    if (shown === steps.length) return !szene && day === 1 ? showDay2() : showDone();
     more.insertAdjacentHTML('beforeend', steps[shown++]);
     app.querySelector('#go')!.scrollIntoView({ block: 'end' });
     setStep(`review-${shown + 1}`);
@@ -332,7 +380,7 @@ function showDone(): void {
   setStep('done');
   app.dataset.echo = '';
   app.querySelector('#go')!.addEventListener('click', () => {
-    // "Again" starts at day 1 with a new seed.
+    // "Again" starts at day 1 with a new seed; a season 1 scene starts again.
     day = 1;
     seed = nextSeed();
     conversation();
