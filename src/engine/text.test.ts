@@ -14,7 +14,7 @@ import type { Scene } from './game';
 const sceneIds = (scene: Scene) => [
   scene.lage, scene.opening.line, ...scene.turns.flat(),
   ...Object.values(scene.options).flat().flatMap(o => [o.reply, ...(o.note ? [o.note] : []), ...(o.echo ? [o.echo, `${o.echo}.brick`] : [])]),
-  scene.review.inner, ...Object.values(scene.review.cost),
+  ...(scene.review.inner ? [scene.review.inner] : []), ...Object.values(scene.review.cost),
 ];
 
 const DAYS = [

@@ -32,7 +32,7 @@ describe('day 1, Frau Brandt', () => {
       expect(state.end, path.join('>')).toBeDefined();
       const r = review(scene, state);
       endings.add(state.end!);
-      for (const id of [r.inner, r.cost, ...r.log.map(e => e.text), ...(state.note ? [state.note] : [])]) {
+      for (const id of [r.inner!, r.cost, ...r.log.map(e => e.text), ...(state.note ? [state.note] : [])]) {
         expect(text[id], `${path.join('>')}: ${id}`).toBeTruthy();
       }
       expect(r.log.length).toBe(path.length * 2 + 1);

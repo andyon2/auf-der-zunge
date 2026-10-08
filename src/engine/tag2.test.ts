@@ -39,7 +39,7 @@ describe('day 2, Jule', () => {
   it('every path ends in a review whose text ids exist', () => {
     for (const { path, states } of paths) {
       const r = review(scene, states.at(-1)!);
-      for (const id of [r.inner, r.cost, ...r.log.map(e => e.text), ...(r.echo ? [r.echo, `${r.echo}.brick`] : [])]) {
+      for (const id of [r.inner!, r.cost, ...r.log.map(e => e.text), ...(r.echo ? [r.echo, `${r.echo}.brick`] : [])]) {
         expect(text[id], `${path.join('>')}: ${id}`).toBeTruthy();
       }
       expect(r.log[0]).toEqual({ who: 'her', text: 'jule.open' });
