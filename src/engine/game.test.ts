@@ -4,6 +4,15 @@ import de from '../../content/de/tag1.json';
 import { choose, hand, newGame, review, type GameState, type Scene } from './game';
 import { mulberry32, nextRound, seedFromDate, shuffle } from './rng';
 import { FACES } from './faces';
+import dachbodenJson from '../../content/dachboden.json';
+import samstagJson from '../../content/samstag.json';
+import gansJson from '../../content/gans.json';
+import deDachboden from '../../content/de/dachboden.json';
+import deSamstag from '../../content/de/samstag.json';
+import deGans from '../../content/de/gans.json';
+import blockDe from '../../content/blocklist.json';
+import { guessHand, takeGuess } from './game';
+import { figure } from '../ui/figure';
 
 const scene = sceneJson as Scene;
 const text = de as Record<string, string>;
@@ -106,4 +115,122 @@ describe('nextRound ("Again")', () => {
   it('survives a broken stored value', () => {
     expect(nextRound('20261007:x', 20261007)).toEqual({ seed: 20261008, stored: '20261007:1' });
   });
+});
+
+// Season 1: every path of the three scenes, the last move and the observing sentence.
+const STAFFEL = [
+  { name: 'dachboden', scene: dachbodenJson as Scene, de: deDachboden as Record<string, string>, paths: 28 },
+  { name: 'samstag', scene: samstagJson as Scene, de: deSamstag as Record<string, string>, paths: 36 },
+  { name: 'gans', scene: gansJson as Scene, de: deGans as Record<string, string>, paths: 36 },
+];
+
+function allPaths(sc: Scene, seed: number): GameState[] {
+  const out: GameState[] = [];
+  const walk = (state: GameState) => {
+    if (state.end) return void out.push(state);
+    for (const id of hand(state)) walk(choose(sc, state, id));
+  };
+  walk(newGame(sc, seed));
+  return out;
+}
+
+describe.each(STAFFEL)('season 1, $name', ({ scene: sc, de: text, paths: count }) => {
+  const ends = allPaths(sc, 20261008);
+
+  it('every path ends, and every text id it shows exists', () => {
+    expect(ends.length).toBe(count);
+    for (const state of ends) {
+      const path = state.chosen.join('-');
+      expect(state.end, path).toBeDefined();
+      const r = review(sc, state);
+      expect(r.inner).toBeUndefined();
+      for (const id of [sc.lage, r.cost, ...r.log.map(e => e.text), ...(state.note ? [state.note] : [])]) {
+        expect(text[id], `${path}: ${id}`).toBeTruthy();
+      }
+    }
+  });
+
+  it('every answer id and every face exists', () => {
+    for (const o of Object.values(sc.options).flat()) {
+      expect(text[o.reply], o.reply).toBeTruthy();
+      expect(FACES[o.face], o.face).toBeDefined();
+    }
+    for (const id of sc.turns.flat()) expect(text[id], id).toBeTruthy();
+  });
+
+  it('every end has a cost line', () => {
+    const endKeys = new Set(Object.values(sc.options).flat().flatMap(o => o.end ? [o.end] : []));
+    expect(new Set(ends.map(s => s.end))).toEqual(endKeys);
+    for (const end of endKeys) expect(text[sc.review.cost[end]], end).toBeTruthy();
+  });
+
+  it('observe covers every path and nothing else', () => {
+    const paths = ends.map(s => s.chosen.join('-')).sort();
+    expect(Object.keys(sc.observe!).sort()).toEqual(paths);
+    for (const state of ends) {
+      const r = review(sc, state);
+      expect(text[r.observe!], state.chosen.join('-')).toBeTruthy();
+    }
+  });
+
+  it('the last move gives four cards and leaves end and cost alone', () => {
+    for (const state of ends) {
+      const cards = guessHand(sc, state);
+      expect(cards).toHaveLength(4);
+      expect(new Set(cards.map(c => c.id)).size).toBe(4);
+      const short = sc.guessShortAfter?.includes(state.end!) ?? false;
+      for (const c of cards) {
+        const g = sc.guess!.find(x => x.id === c.id)!;
+        expect(c.text).toBe(short ? g.short ?? g.text : g.text);
+        expect(text[c.text], c.text).toBeTruthy();
+        const after = takeGuess(sc, state, c.id);
+        expect(after.end).toBe(state.end);
+        expect(after.chosen).toEqual(state.chosen);
+        expect(after.line).toBe(g.reply); // TREPPE 'stufe'
+        expect(after.face).toBe(g.face);
+        expect(guessHand(sc, after)).toEqual([]);
+        const r = review(sc, after);
+        expect(r.cost).toBe(review(sc, state).cost);
+        expect(r.observe).toBe(review(sc, state).observe);
+        expect(r.log.slice(-2)).toEqual([{ who: 'you', text: c.text }, { who: 'her', text: g.reply }]);
+      }
+    }
+    expect(guessHand(sc, newGame(sc, 1))).toEqual([]); // not before the end
+  });
+
+  it('every guess text exists, weights stay out of the texts', () => {
+    expect(sc.guess).toHaveLength(4);
+    for (const g of sc.guess!) {
+      for (const id of [g.text, g.reply, ...(g.alt ? [g.alt] : []), ...(g.short ? [g.short] : [])]) expect(text[id], id).toBeTruthy();
+      expect(FACES[g.face]).toBeDefined();
+    }
+  });
+
+  it('shuffles the guess cards with the seed of the game', () => {
+    expect(newGame(sc, 5).guesses).toEqual(newGame(sc, 5).guesses);
+    const orders = new Set(Array.from({ length: 50 }, (_, i) => newGame(sc, i).guesses.join('')));
+    expect(orders.size).toBeGreaterThan(1);
+  });
+
+  it('has the ui labels of a scene and a figure', () => {
+    for (const id of ['ui.lastQuestion', 'ui.observe', 'ui.stage', 'ui.face']) expect(text[id], id).toBeTruthy();
+    for (const f of Object.values(FACES)) expect(figure(f, sc.who)).not.toContain('undefined');
+  });
+
+  it.each(Object.entries(text))('%s has no blocked word and no digits', (_id, s) => {
+    for (const w of blockDe) expect(s.toLowerCase()).not.toContain(w.toLowerCase());
+    expect(s).not.toMatch(/\d/);
+  });
+});
+
+it('day 1 has no guess cards', () => {
+  expect(newGame(scene, 5).guesses).toEqual([]);
+});
+
+it('Dachboden: after ending E the cards are the short ones', () => {
+  const sc = dachbodenJson as Scene;
+  let s = newGame(sc, 1);
+  for (const id of ['A', 'E']) s = choose(sc, s, id);
+  expect(s.end).toBe('E');
+  expect(guessHand(sc, s).map(c => c.text).sort()).toEqual(['guess.K1.short', 'guess.K2.short', 'guess.K3.short', 'guess.K4.short']);
 });
