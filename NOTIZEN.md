@@ -249,3 +249,10 @@ Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft
 - Zurueck-Geste: ein Verlaufseintrag je Oberflaeche ausser dem Startbild (Gespraech, Rueckblick-Schritte, Tag 2, Ende, Hilfe), gleiche URL. Hilfe und Rueckblick-Schritte folgen der Geste; Gespraech, `review-1`, Tag 2 und Ende holen sie mit `history.go()` zurueck (kein neues `pushState`, das braucht keine Nutzergeste). `#back` ruft `history.back()`.
 - Kein Test fuer `popstate` in `app.test.ts`: die Testumgebung ist `node`, jsdom ist nicht installiert (keine neue Abhaengigkeit dafuer). Abgedeckt ist es durch den Playwright-Durchlauf (Hilfe, Gespraech, Rueckblick, Tag 2, `?hilfe=1`). Die Sprachwahl ist in `app.test.ts` getestet (Inline-Script aus `index.html` mit Stubs ausgefuehrt).
 - Offen: Verhalten nur in Chromium (Desktop-Emulation) geprueft, nicht auf Chrome Android oder iOS Safari mit echter Zurueck-Geste. Nach Reload auf einem Rueckblick-Eintrag zeigt Zurueck frueher gespielte Eintraege als neue Seite (Startbild); gewollt, da kein Spielstand gespeichert wird.
+
+## 2026-10-08 Fall brandt (GFK-Befund, Head-Entscheidung nach E21, Andi hat noch nicht abgesegnet)
+
+| Stelle | Alt | Neu | Grund |
+|---|---|---|---|
+| inner (content/de/tag1.json) | Mein Chef hat gefragt, ob ich Kessler noch im Griff habe. Ich weiß es selbst nicht. | Mein Chef hat gefragt, ob ich Kessler noch im Griff habe. Seitdem bin ich unsicher und weiß es selbst nicht. Ich will, dass man mir das zutraut. | Verborgenes: Andi (anders): fall.md nennt als Verborgenes verunsichert und „dass man ihr die Sache zutraut“; der Satz zeigt nur die Tatsache. Der Umstand bleibt als Auslöser stehen. |
+| lage (content/de/tag1.json) | Deine Chefin. Freitag, 16:50. Du willst um fünf gehen. Schon oft bist du freitags länger geblieben. | Deine Chefin. Freitag, zehn vor fünf. Du willst um fünf gehen. Schon oft bist du freitags länger geblieben. | Spieltext: Ziffern sind im Spieltext verboten; B sagt schon „zehn vor fünf“. |
