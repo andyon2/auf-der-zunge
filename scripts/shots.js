@@ -11,6 +11,10 @@
 // switch to the international list and back, "Back" to the start. Ways back from the start, the review, day 2 and the end
 // inside the played runs (the screen must be the same as before). Country from browser language / time zone. Offline: help page too.
 // On the help page digits are allowed only in numbers, links, hours and the date; blocked words in all but numbers, names, links.
+// Season 1 (?szene=dachboden|samstag|gans, German only): one run per end of each scene in 390x844 and 360x640, the first end
+// also in 375x667, dark, and with English stored (falls back to German). The last move rotates over the four guesses.
+// Checks as above, plus: the stage line and the four guess cards, her answer to the guess (short after guessShortAfter),
+// the cost line, the link "Was ist da passiert?" and its sentence, "Noch mal" plays the scene again.
 // Run: npm run shots [-- <dir>] (builds first). Output: <dir>/<lang>/<path>/NN-<step>.png, <dir>/reset/, <dir>/offline/
 // (<dir> defaults to shots)
 import { chromium } from 'playwright';
@@ -56,7 +60,7 @@ function check(page, lang) {
     const out = [];
     const W = innerWidth, H = innerHeight;
     const help = document.getElementById('app').dataset.step === 'help';
-    document.querySelectorAll('.caption, .her, .you, .say, .over, .log p, .rv p, .title, .tagline, .help-link, .day, .echo, .safe, .hname, .hours, .hland, .hchecked, .switch').forEach(el => {
+    document.querySelectorAll('.caption, .her, .you, .say, .over, .note, .log p, .rv p, .title, .tagline, .help-link, .day, .echo, .safe, .hname, .hours, .hland, .hchecked, .switch').forEach(el => {
       const cs = getComputedStyle(el);
       const h = el.getBoundingClientRect().height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
         - parseFloat(cs.borderTopWidth) - parseFloat(cs.borderBottomWidth);
@@ -101,8 +105,9 @@ function check(page, lang) {
   }, { BLOCK: LANGS[lang].block, CLOCK: LANGS[lang].clock, LANG: lang });
 }
 
-const server = await preview({ preview: { port: 4179, strictPort: true }, logLevel: 'silent' });
-const url = `http://localhost:4179/?seed=${SEED}`;
+const PORT = Number(process.env.SHOTS_PORT) || 4179; // another port lets two worktrees run shots at the same time
+const server = await preview({ preview: { port: PORT, strictPort: true }, logLevel: 'silent' });
+const url = `http://localhost:${PORT}/?seed=${SEED}`;
 const browser = await chromium.launch();
 rmSync(OUT, { recursive: true, force: true });
 
@@ -293,6 +298,112 @@ for (const run of RUNS) {
   }
   await context.close();
 }
+
+// ---------- Season 1 ----------
+// Every path of a scene as option ids, walked like the engine does (first outcome whose `after` was chosen).
+function scenePaths(sc) {
+  const out = [];
+  const walk = (turn, chosen) => {
+    for (const id of sc.turns[turn]) {
+      const o = sc.options[id].find(x => !x.after || chosen.includes(x.after));
+      const path = [...chosen, id];
+      if (o.end) out.push({ picks: path, end: o.end, outcomes: path.map((p, i) => sc.options[p].find(x => !x.after || path.slice(0, i).includes(x.after))) });
+      else walk(o.next, path);
+    }
+  };
+  walk(0, []);
+  return out;
+}
+const STAFFEL_RUNS = ['dachboden', 'samstag', 'gans'].flatMap(name => {
+  const sc = json(`${name}.json`);
+  const t = { ...LANGS.de.t1, ...json(`de/${name}.json`) };
+  const byEnd = new Map();
+  for (const p of scenePaths(sc)) if (!byEnd.has(p.end)) byEnd.set(p.end, p);
+  const ends = [...byEnd.values()];
+  const guess = i => sc.guess[i % sc.guess.length];
+  return [
+    ...ends.map((p, i) => ({ name, sc, t, ...p, guess: guess(i), viewport: BIG, run: `${p.picks.join('-')}` })),
+    ...ends.map((p, i) => ({ name, sc, t, ...p, guess: guess(i + 1), viewport: SMALL, run: `360-${p.picks.join('-')}` })),
+    { name, sc, t, ...ends[0], guess: guess(2), viewport: MID, run: `375-${ends[0].picks.join('-')}` },
+    { name, sc, t, ...ends[0], guess: guess(3), viewport: BIG, dark: true, run: `dunkel-${ends[0].picks.join('-')}` },
+    { name, sc, t, ...ends[0], guess: guess(0), viewport: BIG, lang: 'en', run: `en-${ends[0].picks.join('-')}` },
+  ];
+});
+
+for (const r of STAFFEL_RUNS) {
+  const dir = `${OUT}/staffel/${r.name}/${r.run}`;
+  mkdirSync(dir, { recursive: true });
+  const { context, page } = await phone(`staffel/${r.name}/${r.run}`, { viewport: r.viewport, dark: r.dark, lang: r.lang ?? 'de' });
+  await page.clock.install();
+  const reach = async step => {
+    let idle = 0;
+    for (let ms = 0; !(await page.$(`#app[data-step="${step}"]`)); ms += 100) {
+      if (ms > 10000) throw new Error(`${dir}: ${step} nicht erreicht`);
+      const active = await page.evaluate(() => [...document.querySelectorAll('.say, #go')].some(el => !el.closest('[hidden]')));
+      idle = active ? 0 : idle + 100;
+      if (idle > MAX_IDLE) { warn(`${dir}: vor ${step} ueber ${MAX_IDLE} ms ohne Karte oder Knopf`); idle = -1e9; }
+      await page.clock.runFor(100);
+    }
+  };
+  let n = 0;
+  const snap = async (step, label = step) => {
+    await reach(step);
+    const file = `${dir}/${String(++n).padStart(2, '0')}-${label}.png`;
+    await page.screenshot({ path: file, animations: 'disabled' });
+    shots++;
+    for (const f of await check(page, 'de')) warn(`${file}: ${f}`); // the scenes are German, also with English stored
+    return file;
+  };
+  const texts = sel => page.$$eval(sel, els => els.map(e => e.textContent));
+
+  await page.goto(`${url}&szene=${r.name}`);
+  let file = await snap('her');
+  const lage = await page.textContent('#lage');
+  if (lage !== r.t[r.sc.lage]) warn(`${file}: Lage "${lage}"`);
+  for (let i = 0; i < r.picks.length; i++) {
+    await snap(`hand-${i + 1}`);
+    await page.click(`.say[data-id="${r.picks[i]}"]`);
+    await snap(`you-${i + 1}`);
+    file = await snap(`face-${i + 1}`);
+    const face = await page.getAttribute('#app', 'data-face');
+    if (face !== r.outcomes[i].face) warn(`${file}: Gesicht ${face} statt ${r.outcomes[i].face}`);
+  }
+  // last move: stage line, four guess cards, her answer (the short one after guessShortAfter)
+  const g = r.picks.length + 1;
+  file = await snap(`hand-${g}`, `hand-${g}-vermutung`);
+  if (await page.textContent('#last') !== r.t['ui.lastQuestion']) warn(`${file}: Regiezeile fehlt`);
+  const short = (r.sc.guessShortAfter ?? []).includes(r.end);
+  const want = r.sc.guess.map(x => r.t[x.text]).sort();
+  const cards = (await texts('.say')).sort();
+  if (JSON.stringify(cards) !== JSON.stringify(want)) warn(`${file}: Vermutungskarten ${JSON.stringify(cards)}`);
+  await page.click(`.say[data-id="${r.guess.id}"]`);
+  await snap(`you-${g}`);
+  file = await snap(`face-${g}`);
+  if (await page.getAttribute('#app', 'data-face') !== r.guess.face) warn(`${file}: Gesicht nach Vermutung`);
+  file = await snap('over');
+  const her = (await texts('.her q')).pop();
+  const reply = short && r.guess.short ? r.guess.short : r.guess.reply; // TREPPE 'stufe'
+  if (her !== r.t[reply]) warn(`${file}: Antwort "${her}" statt ${reply}`);
+  await page.click('#go');
+  file = await snap('review-1');
+  if (await page.$('.inner')) warn(`${file}: Inneres steht da`);
+  await page.click('#go');
+  file = await snap('review-2');
+  const rv = await texts('.rv p');
+  if (!rv.includes(r.t[r.sc.review.cost[r.end]])) warn(`${file}: Kostenzeile ${r.end} fehlt`);
+  const obs = r.sc.observe[r.picks.join('-')];
+  if (await page.textContent('#obs') !== r.t['ui.observe']) warn(`${file}: Link zum Beobachtungssatz fehlt`);
+  await page.click('#obs');
+  file = await snap('review-2', 'review-2-satz');
+  if (!(await texts('.rv .obs')).includes(r.t[obs])) warn(`${file}: Beobachtungssatz ${obs} fehlt`);
+  await page.click('#go');
+  await snap('done');
+  await page.click('#go');
+  await snap('her', 'noch-mal');
+  if (await page.getAttribute('.stage svg', 'aria-label') !== r.t['ui.stage']) warn(`${dir}: Noch mal spielt nicht ${r.name}`);
+  await context.close();
+}
+console.log(`Staffel 1: ${STAFFEL_RUNS.length} Laeufe`);
 
 // Help page for every country, in both languages, 390x844 light and dark and 360x640; switch to the international list and back; "Back" to the start.
 for (const land of LANDS) for (const lang of Object.keys(LANGS)) for (const [vp, dark] of [[BIG, false], [BIG, true], [SMALL, false]]) {
