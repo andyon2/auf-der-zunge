@@ -21,7 +21,7 @@ export interface Guess {
   reply: string;      // text id of her answer (TREPPE 'stufe')
   face: FaceName;
   alt?: string;       // her answer for TREPPE 'eigene'
-  short?: string;     // shorter card text after the ends in guessShortAfter
+  short?: string;     // her shorter answer after the ends in guessShortAfter (Dachboden: Mira on the ladder)
 }
 
 export interface Scene {
@@ -33,7 +33,7 @@ export interface Scene {
   options: Record<string, Outcome[]>;
   review: { inner?: string; cost: Record<string, string> }; // season 1 has no inner line, the last move replaces it
   guess?: Guess[];            // the last move after the end
-  guessShortAfter?: string[]; // ends after which the cards show `short`
+  guessShortAfter?: string[]; // ends after which she answers with `short`
   observe?: Record<string, string>; // chosen option ids joined with '-' -> text id of the observing sentence
 }
 
@@ -102,14 +102,16 @@ export function choose(scene: Scene, state: GameState, option: string): GameStat
 }
 
 // The last move: once the conversation is over and nothing is guessed yet, the four guess cards as { id, text id }.
-// After an end in guessShortAfter the cards show `short` where there is one.
 export function guessHand(scene: Scene, state: GameState): { id: string; text: string }[] {
   if (!state.end || state.guessed) return [];
-  const short = scene.guessShortAfter?.includes(state.end) ?? false;
-  return state.guesses.map(id => {
-    const g = scene.guess!.find(x => x.id === id)!;
-    return { id, text: short ? g.short ?? g.text : g.text };
-  });
+  return state.guesses.map(id => ({ id, text: scene.guess!.find(x => x.id === id)!.text }));
+}
+
+// Her answer to a guess: `short` after an end in guessShortAfter, else by TREPPE.
+// (`short` is her answer, not the card: dachboden.md, table "nach E (kurz, von der Leiter)".)
+export function guessReply(scene: Scene, end: string, g: Guess): string {
+  if (g.short && scene.guessShortAfter?.includes(end)) return g.short;
+  return TREPPE === 'eigene' ? g.alt ?? g.reply : g.reply;
 }
 
 // Take one guess: her answer and face change, end and cost stay. The guess is logged, but not part of `chosen`.
@@ -117,7 +119,7 @@ export function takeGuess(scene: Scene, state: GameState, id: string): GameState
   const card = guessHand(scene, state).find(c => c.id === id);
   if (!card) throw new Error(`guess ${id} not in hand`);
   const g = scene.guess!.find(x => x.id === id)!;
-  const reply = TREPPE === 'eigene' ? g.alt ?? g.reply : g.reply;
+  const reply = guessReply(scene, state.end!, g);
   return {
     ...state,
     guessed: id,

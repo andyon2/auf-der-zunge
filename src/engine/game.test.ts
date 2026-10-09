@@ -11,7 +11,7 @@ import deDachboden from '../../content/de/dachboden.json';
 import deSamstag from '../../content/de/samstag.json';
 import deGans from '../../content/de/gans.json';
 import blockDe from '../../content/blocklist.json';
-import { guessHand, takeGuess } from './game';
+import { guessHand, guessReply, takeGuess } from './game';
 import { figure } from '../ui/figure';
 
 const scene = sceneJson as Scene;
@@ -181,18 +181,19 @@ describe.each(STAFFEL)('season 1, $name', ({ scene: sc, de: text, paths: count }
       const short = sc.guessShortAfter?.includes(state.end!) ?? false;
       for (const c of cards) {
         const g = sc.guess!.find(x => x.id === c.id)!;
-        expect(c.text).toBe(short ? g.short ?? g.text : g.text);
+        expect(c.text).toBe(g.text);
         expect(text[c.text], c.text).toBeTruthy();
         const after = takeGuess(sc, state, c.id);
         expect(after.end).toBe(state.end);
         expect(after.chosen).toEqual(state.chosen);
-        expect(after.line).toBe(g.reply); // TREPPE 'stufe'
+        expect(after.line).toBe(short ? g.short ?? g.reply : g.reply); // TREPPE 'stufe'
+        expect(after.line).toBe(guessReply(sc, state.end!, g));
         expect(after.face).toBe(g.face);
         expect(guessHand(sc, after)).toEqual([]);
         const r = review(sc, after);
         expect(r.cost).toBe(review(sc, state).cost);
         expect(r.observe).toBe(review(sc, state).observe);
-        expect(r.log.slice(-2)).toEqual([{ who: 'you', text: c.text }, { who: 'her', text: g.reply }]);
+        expect(r.log.slice(-2)).toEqual([{ who: 'you', text: c.text }, { who: 'her', text: after.line }]);
       }
     }
     expect(guessHand(sc, newGame(sc, 1))).toEqual([]); // not before the end
@@ -227,10 +228,16 @@ it('day 1 has no guess cards', () => {
   expect(newGame(scene, 5).guesses).toEqual([]);
 });
 
-it('Dachboden: after ending E the cards are the short ones', () => {
+it('Dachboden: after the ends E and E.w Mira answers from the ladder with the short line', () => {
   const sc = dachbodenJson as Scene;
+  for (const [ids, end] of [[['A', 'E'], 'E'], [['D', 'E'], 'E.w']] as const) {
+    let s = newGame(sc, 1);
+    for (const id of ids) s = choose(sc, s, id);
+    expect(s.end).toBe(end);
+    expect(guessHand(sc, s).map(c => c.text).sort()).toEqual(['guess.K1', 'guess.K2', 'guess.K3', 'guess.K4']);
+    expect(sc.guess!.map(g => takeGuess(sc, s, g.id).line)).toEqual(['guess.K1.short', 'guess.K2.short', 'guess.K3.short', 'guess.K4.short']);
+  }
   let s = newGame(sc, 1);
-  for (const id of ['A', 'E']) s = choose(sc, s, id);
-  expect(s.end).toBe('E');
-  expect(guessHand(sc, s).map(c => c.text).sort()).toEqual(['guess.K1.short', 'guess.K2.short', 'guess.K3.short', 'guess.K4.short']);
+  for (const id of ['A', 'F', 'I']) s = choose(sc, s, id);
+  expect(takeGuess(sc, s, 'K1').line).toBe('guess.K1.reply');
 });
