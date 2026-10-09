@@ -266,3 +266,4 @@ Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft
 - `short` ist ihre Antwort, nicht der Kartentext: `dachboden.md` Spalte "nach E (kurz, von der Leiter)". Der Auftrag sagte "short statt text fuer die Karten"; umgesetzt ist die Lesart der Daten, Spieltext unveraendert.
 - `scripts/shots.js` spielt jede Szene bis zu jedem Ende (390 und 360, dazu 375, dunkel und mit gespeichertem `en`). Port per `SHOTS_PORT` aenderbar (Standard 4179).
 - Offen: Lage, einige Antworten und Kostenzeilen sind laenger als die Zeilengrenze; bei 390/360 ragen Hand und Rueckblick unten raus (Befunde aus dem Text, nicht gekuerzt).
+- Lauf 5: Texte auf Shots-Laenge gekuerzt, Befund-Vorschlaege eingearbeitet
