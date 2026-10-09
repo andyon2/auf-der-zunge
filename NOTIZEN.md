@@ -255,7 +255,7 @@ Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft
 - Szenen `content/{dachboden,samstag,gans}.json` und `content/de/<name>.json`, 1:1 aus Szenenbauer Lauf 4. Gans hat zusaetzlich `"frame": "phone"`. Die de-Dateien tragen je vier eigene `ui.*`-Schluessel: `lastQuestion` ("Eine Frage hast du noch."), `observe` ("Was ist da passiert?"), `stage` und `face` (Figurenname). Alle anderen UI-Texte kommen aus `de/day1.json`.
 - `?szene=dachboden|samstag|gans` startet die Szene direkt: Lage, Gespraech, letzter Zug, Rueckblick, Ende. Unbekannter Name: normales Spiel. Ohne `?szene` laufen Tag 1 und Tag 2 wie vorher. Die Szenen spielen immer deutsch (Englisch faellt ohne Fehler auf Deutsch zurueck). `adz.day1end` wird in einer Szene nicht gespeichert. "Noch mal" spielt dieselbe Szene neu.
 - Neue Felder in `Scene` (`src/engine/game.ts`):
-  - `who`: zusaetzlich `mira`, `albers`, `mutter` (Figuren in `src/ui/figure.ts`, Farben `--*-c/d/e` in `style.css`). Die Mutter ist ohne Telefon gezeichnet.
+  - `who`: zusaetzlich `mira`, `albers`, `mutter` (Figuren in `src/ui/figure.ts`, Farben `--*-c/d/e` in `style.css`). Die Mutter haelt das Telefon (`phone: true`, wie Jule).
   - `frame?: 'chat' | 'phone'`: `phone` rendert wie von Angesicht.
   - `review.inner` ist optional; fehlt es, entfaellt der Schritt.
   - `guess`: vier Ratekarten `{ id, weight, text, reply, face, alt?, short? }`, mit dem Seed gemischt (nach den Haenden, Tag 1 und Tag 2 bleiben gleich). `weight` wird nie gezeigt.

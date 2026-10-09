@@ -38,7 +38,7 @@ const LOOKS: Record<Who, Look> = {
   },
   // white hair combed back into a bun, blouse collar
   mutter: {
-    skin: 'var(--skin-e)', hair: 'var(--hair-e)', cloth: 'var(--cloth-e)', glasses: false, wear: 'collar', phone: false, age: 2, hairLine: true,
+    skin: 'var(--skin-e)', hair: 'var(--hair-e)', cloth: 'var(--cloth-e)', glasses: false, wear: 'collar', phone: true, age: 2, hairLine: true,
     hairBack: 'M62 90 C58 52 80 36 100 36 C120 36 142 52 138 90 L136 104 L64 104 Z M84 40 C80 18 120 18 116 40 Z',
     hairFront: 'M66 80 C64 52 84 40 100 40 C116 40 136 52 134 80 C126 62 112 54 100 54 C88 54 74 62 66 80 Z',
   },
