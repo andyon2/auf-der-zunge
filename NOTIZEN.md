@@ -249,3 +249,20 @@ Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft
 - Zurueck-Geste: ein Verlaufseintrag je Oberflaeche ausser dem Startbild (Gespraech, Rueckblick-Schritte, Tag 2, Ende, Hilfe), gleiche URL. Hilfe und Rueckblick-Schritte folgen der Geste; Gespraech, `review-1`, Tag 2 und Ende holen sie mit `history.go()` zurueck (kein neues `pushState`, das braucht keine Nutzergeste). `#back` ruft `history.back()`.
 - Kein Test fuer `popstate` in `app.test.ts`: die Testumgebung ist `node`, jsdom ist nicht installiert (keine neue Abhaengigkeit dafuer). Abgedeckt ist es durch den Playwright-Durchlauf (Hilfe, Gespraech, Rueckblick, Tag 2, `?hilfe=1`). Die Sprachwahl ist in `app.test.ts` getestet (Inline-Script aus `index.html` mit Stubs ausgefuehrt).
 - Offen: Verhalten nur in Chromium (Desktop-Emulation) geprueft, nicht auf Chrome Android oder iOS Safari mit echter Zurueck-Geste. Nach Reload auf einem Rueckblick-Eintrag zeigt Zurueck frueher gespielte Eintraege als neue Seite (Startbild); gewollt, da kein Spielstand gespeichert wird.
+
+## Staffel 1
+
+- Szenen `content/{dachboden,samstag,gans}.json` und `content/de/<name>.json`, 1:1 aus Szenenbauer Lauf 4. Gans hat zusaetzlich `"frame": "phone"`. Die de-Dateien tragen je vier eigene `ui.*`-Schluessel: `lastQuestion` ("Eine Frage hast du noch."), `observe` ("Was ist da passiert?"), `stage` und `face` (Figurenname). Alle anderen UI-Texte kommen aus `de/day1.json`.
+- `?szene=dachboden|samstag|gans` startet die Szene direkt: Lage, Gespraech, letzter Zug, Rueckblick, Ende. Unbekannter Name: normales Spiel. Ohne `?szene` laufen Tag 1 und Tag 2 wie vorher. Die Szenen spielen immer deutsch (Englisch faellt ohne Fehler auf Deutsch zurueck). `adz.day1end` wird in einer Szene nicht gespeichert. "Noch mal" spielt dieselbe Szene neu.
+- Neue Felder in `Scene` (`src/engine/game.ts`):
+  - `who`: zusaetzlich `mira`, `albers`, `mutter` (Figuren in `src/ui/figure.ts`, Farben `--*-c/d/e` in `style.css`). Die Mutter ist ohne Telefon gezeichnet.
+  - `frame?: 'chat' | 'phone'`: `phone` rendert wie von Angesicht.
+  - `review.inner` ist optional; fehlt es, entfaellt der Schritt.
+  - `guess`: vier Ratekarten `{ id, weight, text, reply, face, alt?, short? }`, mit dem Seed gemischt (nach den Haenden, Tag 1 und Tag 2 bleiben gleich). `weight` wird nie gezeigt.
+  - `guessShortAfter`: Enden, nach denen sie mit `short` antwortet. Die Karten zeigen immer `text` (siehe unten).
+  - `observe`: Satz je Pfad (`"A-E-H"`), im Rueckblick hinter dem Link "Was ist da passiert?". Fehlt der Schluessel, fehlt der Link.
+- Letzter Zug nach dem Ende: Buehnenzeile, vier Karten, ihre Antwort mit Gesicht, dann Kosten und Rueckblick. Die Wahl aendert weder Ende noch Kosten. Karte und Antwort stehen im Rueckblick-Verlauf.
+- Schalter `TREPPE: 'stufe' | 'eigene'` in `game.ts`, Standard `'stufe'` (immer `reply`); `'eigene'` nimmt `alt`, wo vorhanden.
+- `short` ist ihre Antwort, nicht der Kartentext: `dachboden.md` Spalte "nach E (kurz, von der Leiter)". Der Auftrag sagte "short statt text fuer die Karten"; umgesetzt ist die Lesart der Daten, Spieltext unveraendert.
+- `scripts/shots.js` spielt jede Szene bis zu jedem Ende (390 und 360, dazu 375, dunkel und mit gespeichertem `en`). Port per `SHOTS_PORT` aenderbar (Standard 4179).
+- Offen: Lage, einige Antworten und Kostenzeilen sind laenger als die Zeilengrenze; bei 390/360 ragen Hand und Rueckblick unten raus (Befunde aus dem Text, nicht gekuerzt).
