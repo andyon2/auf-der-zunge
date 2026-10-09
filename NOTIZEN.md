@@ -267,3 +267,4 @@ Sperrliste fuer alles ausser Nummern, Namen der Stellen und Links. Vitest prueft
 - `scripts/shots.js` spielt jede Szene bis zu jedem Ende (390 und 360, dazu 375, dunkel und mit gespeichertem `en`). Port per `SHOTS_PORT` aenderbar (Standard 4179).
 - Offen: Lage, einige Antworten und Kostenzeilen sind laenger als die Zeilengrenze; bei 390/360 ragen Hand und Rueckblick unten raus (Befunde aus dem Text, nicht gekuerzt).
 - Lauf 5: Texte auf Shots-Laenge gekuerzt, Befund-Vorschlaege eingearbeitet
+- Lauf 6: sechs schwaechere Zeilen nach Ausbilder Lauf 5 gesetzt (Dachboden lage, D, R2, K4; Gans K2, I; Samstag Anrede Herr Kraus), Shots 0 Befunde
