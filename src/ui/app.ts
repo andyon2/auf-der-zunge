@@ -46,7 +46,8 @@ const texts = () => szene ? STAFFEL[szene].text : TEXTS[lang][day];
 const chat = () => scene().frame === 'chat';
 
 // Pauses between the beats of one exchange (ms). No screen without a card or button lasts longer than 1 s.
-const BEAT = { hand: 600, you: 400, face: 600 };
+// last: the stage line of the last move stands alone before the guess cards (after face, so still under 1 s).
+const BEAT = { hand: 600, you: 400, face: 600, last: 300 };
 
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -291,7 +292,7 @@ async function conversation(): Promise<void> {
 async function lastMove(sc: Scene, state: GameState, lines: HTMLElement, below: HTMLElement): Promise<GameState> {
   const n = state.chosen.length + 1;
   lines.insertAdjacentHTML('beforeend', `<p class="note appear" id="last">${t('ui.lastQuestion')}</p>`);
-  await wait(BEAT.hand);
+  await wait(BEAT.last);
   const cards = guessHand(sc, state);
   const id = await pick(below, cards, n);
   const next = takeGuess(sc, state, id);
@@ -350,7 +351,9 @@ function showReview(state: GameState): void {
   // the link gives way to the sentence (delegated: the steps are drawn again on back and forward)
   more.addEventListener('click', e => {
     const link = (e.target as Element).closest('#obs');
-    if (link) link.parentElement!.outerHTML = `<p class="obs appear">${t(r.observe!)}</p>`;
+    if (!link) return;
+    link.parentElement!.outerHTML = `<p class="obs appear">${t(r.observe!)}</p>`;
+    app.querySelector('#go')!.scrollIntoView({ block: 'end' });
   });
   window.scrollTo(0, 0);
   let shown = 0;

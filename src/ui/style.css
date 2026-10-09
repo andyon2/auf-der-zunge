@@ -152,6 +152,7 @@ q { quotes: "\201E" "\201C"; }
 .log .y { color: var(--ink-2); }
 .rv { margin: 14px 16px 0; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 17px; line-height: 1.35; }
 .rv .inner { font-style: italic; color: var(--ink-3); }
+.rv .obs { margin-top: 8px; font-style: italic; color: var(--ink-2); }
 
 /* Figure lines */
 .f-ln   { fill: none; stroke: var(--fig-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
